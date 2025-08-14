@@ -6,7 +6,6 @@ Simple application for uploading files to WaifuVault.
 
 - Drag and drop file uploads
 - One-click URL copying
-- Beautiful gradient UI with glassmorphism effects
 - Fast uploads with loading states
 - Responsive design
 - Environment variable configuration
