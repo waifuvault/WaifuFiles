@@ -18,23 +18,18 @@ Simple application for uploading files to WaifuVault.
 npm install
 ```
 
-2. Install the additional required dependency for file parsing:
-```bash
-npm install formidable
-npm install --save-dev @types/formidable
-```
 
-3. Create a `.env.local` file in the root directory:
+2. Create a `.env.local` file in the root directory:
 ```bash
 WAIFUVAULT_BUCKET_TOKEN=your_actual_bucket_token_here
 ```
 
-4. Run the development server:
+3. Run the development server:
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Usage
 
