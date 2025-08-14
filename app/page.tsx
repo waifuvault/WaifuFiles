@@ -30,13 +30,13 @@ export default function Home() {
                 const response = await fetch('/api/restrictions');
                 const restrictions: Restriction[] = await response.json();
 
-                restrictions.forEach(restriction => {
+                for (const restriction of restrictions) {
                     if (restriction.type === 'MAX_FILE_SIZE') {
                         setMaxFileSize(Number(restriction.value));
                     } else if (restriction.type === 'BANNED_MIME_TYPE') {
                         setBannedTypes(String(restriction.value).split(','));
                     }
-                });
+                }
             } catch (error) {
                 console.error('Failed to fetch restrictions:', error);
             }

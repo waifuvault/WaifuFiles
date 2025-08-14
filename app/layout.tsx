@@ -30,14 +30,7 @@ export const metadata: Metadata = {
         images: ['https://waifuvault.moe/assets/custom/images/vic_vault.webp']
     },
     icons: {
-        icon: [
-            {url: '/favicon.ico', sizes: '32x32'},
-            {url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16'},
-            {url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32'}
-        ],
-        apple: [
-            {url: '/apple-touch-icon.png', sizes: '180x180'}
-        ],
+        icon: '/favicon.ico', // Only if you have this file
         shortcut: '/favicon.ico'
     },
     manifest: '/site.webmanifest'
@@ -55,8 +48,6 @@ export default function RootLayout({children,}: {
         <html lang="en">
         <head>
             <link rel="icon" href="/favicon.ico" sizes="32x32"/>
-            <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
-            <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
             <link rel="manifest" href="/site.webmanifest"/>
             <meta name="theme-color" content="#667eea"/>
         </head>
