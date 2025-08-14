@@ -1,35 +1,46 @@
 /* Import a nice font for that anime aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 .container {
     min-height: 100vh;
     background: #0a0a0a;
     color: #ffffff;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
     position: relative;
     overflow-x: hidden;
 }
 
 /* Animated background */
 .container::before {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background:
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
     animation: float 20s ease-in-out infinite;
     z-index: -1;
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33% { transform: translateY(-20px) rotate(1deg); }
-    66% { transform: translateY(-10px) rotate(-1deg); }
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-20px) rotate(1deg);
+    }
+    66% {
+        transform: translateY(-10px) rotate(-1deg);
+    }
 }
 
 .header {
@@ -47,7 +58,7 @@
 .logoImage {
     width: 150px;
     height: 150px;
-    background-image: url('https://waifuvault.moe/assets/custom/images/vic_vault.webp');
+    background-image: url("https://waifuvault.moe/assets/custom/images/vic_vault.webp");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -60,7 +71,7 @@
 }
 
 .logoImage::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -82,8 +93,13 @@
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .title {
@@ -122,7 +138,7 @@
 }
 
 .dropzone::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
@@ -172,6 +188,17 @@
     font-size: 0.9rem;
     color: #a0a0a0;
     font-style: italic;
+}
+
+.permanentHint {
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.permanentHint strong {
+    color: #22c55e;
+    font-weight: 600;
 }
 
 .uploadSection {
@@ -299,7 +326,8 @@
     gap: 0.75rem;
 }
 
-.uploadBtn, .retryBtn {
+.uploadBtn,
+.retryBtn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
@@ -311,7 +339,8 @@
     font-size: 0.85rem;
 }
 
-.uploadBtn:hover, .retryBtn:hover {
+.uploadBtn:hover,
+.retryBtn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
@@ -334,8 +363,12 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .completed {
@@ -352,7 +385,7 @@
     color: #ffffff;
     padding: 0.5rem;
     border-radius: 6px;
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: "Monaco", "Consolas", monospace;
     font-size: 0.8rem;
     min-width: 200px;
 }

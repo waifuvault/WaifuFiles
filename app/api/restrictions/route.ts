@@ -1,4 +1,4 @@
-import {NextResponse} from 'next/server';
+import { NextResponse } from "next/server";
 
 interface Restriction {
     type: string;
@@ -7,31 +7,31 @@ interface Restriction {
 
 export async function GET() {
     try {
-        const response = await fetch('https://waifuvault.moe/rest/resources/restrictions');
+        const response = await fetch("https://waifuvault.moe/rest/resources/restrictions");
 
         if (!response.ok) {
-            throw new Error('Failed to fetch restrictions');
+            throw new Error("Failed to fetch restrictions");
         }
 
         const restrictions: Restriction[] = await response.json();
 
         return NextResponse.json(restrictions, {
             headers: {
-                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
-            }
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+            },
         });
     } catch (error) {
-        console.error('Failed to fetch restrictions:', error);
+        console.error("Failed to fetch restrictions:", error);
 
         const defaultRestrictions: Restriction[] = [
             {
                 type: "MAX_FILE_SIZE",
-                value: 1048576000 // 1GB default
+                value: 1048576000, // 1GB default
             },
             {
                 type: "BANNED_MIME_TYPE",
-                value: "application/x-dosexec,application/x-executable,application/x-hdf5,application/x-java-archive,application/vnd.rar"
-            }
+                value: "application/x-dosexec,application/x-executable,application/x-hdf5,application/x-java-archive,application/vnd.rar",
+            },
         ];
 
         return NextResponse.json(defaultRestrictions);

@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import React, {DragEvent, useEffect, useRef, useState} from 'react';
-import styles from './page.module.css';
-import {WaifuFile} from "waifuvault-node-api";
+import React, { DragEvent, useEffect, useRef, useState } from "react";
+import styles from "./page.module.css";
+import { WaifuFile } from "waifuvault-node-api";
 
 interface UploadItem {
     file: File;
-    status: 'pending' | 'uploading' | 'completed' | 'error';
+    status: "pending" | "uploading" | "completed" | "error";
     result?: WaifuFile;
     error?: string;
     progress?: number;
@@ -27,18 +27,18 @@ export default function Home() {
     useEffect(() => {
         const fetchRestrictions = async () => {
             try {
-                const response = await fetch('/api/restrictions');
+                const response = await fetch("/api/restrictions");
                 const restrictions: Restriction[] = await response.json();
 
                 for (const restriction of restrictions) {
-                    if (restriction.type === 'MAX_FILE_SIZE') {
+                    if (restriction.type === "MAX_FILE_SIZE") {
                         setMaxFileSize(Number(restriction.value));
-                    } else if (restriction.type === 'BANNED_MIME_TYPE') {
-                        setBannedTypes(String(restriction.value).split(','));
+                    } else if (restriction.type === "BANNED_MIME_TYPE") {
+                        setBannedTypes(String(restriction.value).split(","));
                     }
                 }
             } catch (error) {
-                console.error('Failed to fetch restrictions:', error);
+                console.error("Failed to fetch restrictions:", error);
             }
         };
 
@@ -50,22 +50,22 @@ export default function Home() {
             if (file.size > maxFileSize) {
                 return {
                     file,
-                    status: 'error' as const,
-                    error: `File too large (${formatFileSize(file.size)}). Max size: ${formatFileSize(maxFileSize)}`
+                    status: "error" as const,
+                    error: `File too large (${formatFileSize(file.size)}). Max size: ${formatFileSize(maxFileSize)}`,
                 };
             }
 
             if (bannedTypes.length > 0 && bannedTypes.includes(file.type)) {
                 return {
                     file,
-                    status: 'error' as const,
-                    error: `File type not allowed: ${file.type}`
+                    status: "error" as const,
+                    error: `File type not allowed: ${file.type}`,
                 };
             }
 
             return {
                 file,
-                status: 'pending' as const
+                status: "pending" as const,
             };
         });
         setUploads(prev => [...prev, ...newUploads]);
@@ -73,18 +73,18 @@ export default function Home() {
 
     const uploadFile = async (uploadIndex: number) => {
         const upload = uploads[uploadIndex];
-        if (!upload || upload.status !== 'pending') return;
+        if (!upload || upload.status !== "pending") return;
 
-        setUploads(prev => prev.map((item, index) =>
-            index === uploadIndex ? { ...item, status: 'uploading', progress: 0 } : item
-        ));
+        setUploads(prev =>
+            prev.map((item, index) => (index === uploadIndex ? { ...item, status: "uploading", progress: 0 } : item)),
+        );
 
         try {
             const formData = new FormData();
-            formData.append('file', upload.file);
+            formData.append("file", upload.file);
 
-            const response = await fetch('/api/upload', {
-                method: 'POST',
+            const response = await fetch("/api/upload", {
+                method: "POST",
                 body: formData,
             });
 
@@ -95,26 +95,30 @@ export default function Home() {
                     throw new Error(`${errorData.name}: ${errorData.error}`);
                 }
 
-                throw new Error(errorData.error || 'Upload failed');
+                throw new Error(errorData.error || "Upload failed");
             }
 
             const result = await response.json();
 
-            setUploads(prev => prev.map((item, index) =>
-                index === uploadIndex ? { ...item, status: 'completed', result, progress: 100 } : item
-            ));
+            setUploads(prev =>
+                prev.map((item, index) =>
+                    index === uploadIndex ? { ...item, status: "completed", result, progress: 100 } : item,
+                ),
+            );
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-            setUploads(prev => prev.map((item, index) =>
-                index === uploadIndex ? { ...item, status: 'error', error: errorMessage } : item
-            ));
+            const errorMessage = error instanceof Error ? error.message : "Upload failed";
+            setUploads(prev =>
+                prev.map((item, index) =>
+                    index === uploadIndex ? { ...item, status: "error", error: errorMessage } : item,
+                ),
+            );
         }
     };
 
     const uploadAll = async () => {
         const pendingUploads = uploads
             .map((upload, index) => ({ upload, index }))
-            .filter(({ upload }) => upload.status === 'pending');
+            .filter(({ upload }) => upload.status === "pending");
 
         for (const { index } of pendingUploads) {
             await uploadFile(index);
@@ -156,7 +160,7 @@ export default function Home() {
         try {
             await navigator.clipboard.writeText(text);
         } catch (err) {
-            console.error('Failed to copy:', err);
+            console.error("Failed to copy:", err);
         }
     };
 
@@ -169,30 +173,32 @@ export default function Home() {
     };
 
     const formatFileSize = (bytes: number): string => {
-        if (bytes === 0) return '0 B';
+        if (bytes === 0) {
+            return "0 B";
+        }
         const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const sizes = ["B", "KB", "MB", "GB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    const pendingCount = uploads.filter(u => u.status === 'pending').length;
-    const completedCount = uploads.filter(u => u.status === 'completed').length;
+    const pendingCount = uploads.filter(u => u.status === "pending").length;
+    const completedCount = uploads.filter(u => u.status === "completed").length;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.logo}>
-                    <a href={'https://waifuvault.moe'} target="_blank" rel="noopener noreferrer">
+                    <a href={"https://waifuvault.moe"} target="_blank" rel="noopener noreferrer">
                         <div className={styles.logoImage}></div>
                     </a>
                 </div>
                 <h1 className={styles.title}>WaifuVault Uploader</h1>
-                <p className={styles.subtitle}>Fast, temporary file hosting</p>
+                <p className={styles.subtitle}>Fast file hosting</p>
             </div>
 
             <div
-                className={`${styles.dropzone} ${isDragging ? styles.dragging : ''}`}
+                className={`${styles.dropzone} ${isDragging ? styles.dragging : ""}`}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
@@ -204,13 +210,18 @@ export default function Home() {
                     type="file"
                     onChange={handleFileSelect}
                     multiple
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                 />
 
                 <div className={styles.dropzoneContent}>
                     <div className={styles.uploadIcon}>📁</div>
                     <p>Drop files here or click to select</p>
-                    <span className={styles.hint}>Multiple files supported • Max {formatFileSize(maxFileSize)} per file</span>
+                    <span className={styles.hint}>
+                        Multiple files supported • Max {formatFileSize(maxFileSize)} per file
+                    </span>
+                    <span className={styles.permanentHint}>
+                        <strong>Permanent storage - files never expire</strong>
+                    </span>
                 </div>
             </div>
 
@@ -239,23 +250,20 @@ export default function Home() {
                                 </div>
 
                                 <div className={styles.uploadStatus}>
-                                    {upload.status === 'pending' && (
-                                        <button
-                                            onClick={() => uploadFile(index)}
-                                            className={styles.uploadBtn}
-                                        >
+                                    {upload.status === "pending" && (
+                                        <button onClick={() => uploadFile(index)} className={styles.uploadBtn}>
                                             Upload
                                         </button>
                                     )}
 
-                                    {upload.status === 'uploading' && (
+                                    {upload.status === "uploading" && (
                                         <div className={styles.uploading}>
                                             <div className={styles.spinner}></div>
                                             <span>Uploading...</span>
                                         </div>
                                     )}
 
-                                    {upload.status === 'completed' && upload.result && (
+                                    {upload.status === "completed" && upload.result && (
                                         <div className={styles.completed}>
                                             <input
                                                 type="text"
@@ -272,28 +280,21 @@ export default function Home() {
                                         </div>
                                     )}
 
-                                    {upload.status === 'error' && (
+                                    {upload.status === "error" && (
                                         <div className={styles.error}>
                                             <span title={upload.error}>
                                                 {upload.error && upload.error.length > 50
                                                     ? `${upload.error.substring(0, 50)}...`
-                                                    : upload.error || 'Failed'
-                                                }
+                                                    : upload.error || "Failed"}
                                             </span>
-                                            <button
-                                                onClick={() => uploadFile(index)}
-                                                className={styles.retryBtn}
-                                            >
+                                            <button onClick={() => uploadFile(index)} className={styles.retryBtn}>
                                                 Retry
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
-                                <button
-                                    onClick={() => removeUpload(index)}
-                                    className={styles.removeBtn}
-                                >
+                                <button onClick={() => removeUpload(index)} className={styles.removeBtn}>
                                     ✕
                                 </button>
                             </div>
