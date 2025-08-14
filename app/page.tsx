@@ -303,7 +303,7 @@ export default function Home() {
 
                     {completedCount > 0 && (
                         <div className={styles.summary}>
-                            <p>✨ {completedCount} files uploaded successfully!</p>
+                            <p>{completedCount} files uploaded successfully!</p>
                         </div>
                     )}
                 </div>
