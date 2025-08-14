@@ -1,15 +1,11 @@
-import {NextApiRequest, NextApiResponse} from 'next';
+import {NextResponse} from 'next/server';
 
 interface Restriction {
     type: string;
     value: string | number;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
+export async function GET() {
     try {
         const response = await fetch('https://waifuvault.moe/rest/resources/restrictions');
 
@@ -19,13 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const restrictions: Restriction[] = await response.json();
 
-        // Cache for 1 hour since restrictions don't change often
-        res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-        res.status(200).json(restrictions);
+        return NextResponse.json(restrictions, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
+            }
+        });
     } catch (error) {
         console.error('Failed to fetch restrictions:', error);
 
-        // Return default values if API fails
         const defaultRestrictions: Restriction[] = [
             {
                 type: "MAX_FILE_SIZE",
@@ -37,6 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         ];
 
-        res.status(200).json(defaultRestrictions);
+        return NextResponse.json(defaultRestrictions);
     }
 }

@@ -1,7 +1,8 @@
-import React, {DragEvent, useEffect, useRef, useState} from 'react';
-import styles from '../styles/Home.module.css';
-import {WaifuFile} from "waifuvault-node-api";
+"use client"
 
+import React, {DragEvent, useEffect, useRef, useState} from 'react';
+import styles from './page.module.css';
+import {WaifuFile} from "waifuvault-node-api";
 
 interface UploadItem {
     file: File;
@@ -88,7 +89,13 @@ export default function Home() {
             });
 
             if (!response.ok) {
-                throw new Error('Upload failed');
+                const errorData = await response.json();
+
+                if (errorData.name && errorData.status) {
+                    throw new Error(`${errorData.name}: ${errorData.error}`);
+                }
+
+                throw new Error(errorData.error || 'Upload failed');
             }
 
             const result = await response.json();
@@ -96,9 +103,10 @@ export default function Home() {
             setUploads(prev => prev.map((item, index) =>
                 index === uploadIndex ? { ...item, status: 'completed', result, progress: 100 } : item
             ));
-        } catch {
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
             setUploads(prev => prev.map((item, index) =>
-                index === uploadIndex ? { ...item, status: 'error', error: 'Upload failed' } : item
+                index === uploadIndex ? { ...item, status: 'error', error: errorMessage } : item
             ));
         }
     };
@@ -266,7 +274,12 @@ export default function Home() {
 
                                     {upload.status === 'error' && (
                                         <div className={styles.error}>
-                                            <span>Failed</span>
+                                            <span title={upload.error}>
+                                                {upload.error && upload.error.length > 50
+                                                    ? `${upload.error.substring(0, 50)}...`
+                                                    : upload.error || 'Failed'
+                                                }
+                                            </span>
                                             <button
                                                 onClick={() => uploadFile(index)}
                                                 className={styles.retryBtn}
