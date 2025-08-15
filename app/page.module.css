@@ -203,7 +203,7 @@
 
 .uploadSection {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 0 auto 2rem;
     padding: 0 1rem;
 }
 
@@ -796,5 +796,285 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* File Preview Styles */
+.filePreview {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.filePreview:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+.filePreviewSmall {
+    width: 40px;
+    height: 40px;
+}
+
+.filePreviewMedium {
+    width: 80px;
+    height: 80px;
+}
+
+.filePreviewLarge {
+    width: 120px;
+    height: 120px;
+}
+
+.previewImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.fileIcon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.filePreviewSmall .fileIcon {
+    font-size: 1rem;
+}
+
+.filePreviewLarge .fileIcon {
+    font-size: 2rem;
+}
+
+.loading {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.previewSpinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.error {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+    flex-direction: column;
+}
+
+.errorText {
+    font-size: 0.7rem;
+    color: #dc3545;
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+.videoPreview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.playOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.audioPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.audioWaves {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+}
+
+.audioWave {
+    width: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    animation: audioWave 1.5s ease-in-out infinite;
+}
+
+.audioWave:nth-child(1) {
+    height: 8px;
+    animation-delay: 0s;
+}
+
+.audioWave:nth-child(2) {
+    height: 15px;
+    animation-delay: 0.3s;
+}
+
+.audioWave:nth-child(3) {
+    height: 10px;
+    animation-delay: 0.6s;
+}
+
+.audioWave:nth-child(4) {
+    height: 12px;
+    animation-delay: 0.9s;
+}
+
+@keyframes audioWave {
+    0%,
+    100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0.3);
+    }
+}
+
+.textPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    height: 100%;
+    overflow: hidden;
+}
+
+.textContent {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.pdfPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.fileType {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.previewOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 0.5rem 0.25rem 0.25rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.filePreview:hover .previewOverlay {
+    opacity: 1;
+}
+
+.fileName {
+    font-size: 0.7rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.filePreviewSmall .previewOverlay {
+    display: none;
+}
+
+/* Drag Preview Styles */
+.dragPreviewContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    z-index: 1;
+}
+
+.dragPreviewContainer h3 {
+    margin: 0;
+    color: #667eea;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.dragPreviews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.75rem;
+    max-width: 400px;
+    width: 100%;
+}
+
+.dragPreviewItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.dragPreviewName {
+    font-size: 0.7rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 60px;
+    word-break: break-word;
+}
+
+.dropInstruction {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin: 0;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
     }
 }

@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import React from "react";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 const opts = {
     description: "Fast, and easy file uploader for WaifuVault",

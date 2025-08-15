@@ -5,8 +5,8 @@ import styles from "./page.module.css";
 import { FileUpload, WaifuFile } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize } from "./utils/upload";
-import DropZone from "./components/DropZone";
 import UploadQueue from "./components/UploadQueue";
+import EnhancedDropZone from "@/app/components/EnhancedDropZone";
 
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
@@ -237,7 +237,7 @@ export default function Home(): ReactElement {
                 <p className={styles.subtitle}>Fast file hosting</p>
             </div>
 
-            <DropZone
+            <EnhancedDropZone
                 isDragging={isDragging}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
