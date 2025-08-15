@@ -241,7 +241,7 @@ export default function Home(): ReactElement {
                     </a>
                 </div>
                 <h1 className={styles.title}>WaifuVault Uploader</h1>
-                <p className={styles.subtitle}>Fast file hosting</p>
+                <p className={styles.subtitle}>Fast File Hosting</p>
             </div>
 
             <EnhancedDropZone
