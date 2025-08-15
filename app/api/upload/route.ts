@@ -1,4 +1,4 @@
-import Waifuvault, { WaifuError } from "waifuvault-node-api";
+import Waifuvault, { FileUpload, WaifuError } from "waifuvault-node-api";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -12,20 +12,66 @@ export async function POST(req: NextRequest) {
         // Parse the FormData from the request
         const formData = await req.formData();
         const file = formData.get("file") as File;
+        const optionsString = formData.get("options") as string;
 
         if (!file) {
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
+        }
+
+        // Parse options if provided
+        let options: Partial<FileUpload> = {};
+        if (optionsString) {
+            try {
+                options = JSON.parse(optionsString);
+            } catch {
+                return NextResponse.json({ error: "Invalid options format" }, { status: 400 });
+            }
+        }
+
+        // Validate expires format if provided
+        if (options.expires && !/^$|^\d+[mhd]$/.test(options.expires)) {
+            return NextResponse.json(
+                {
+                    error: "Invalid expires format. Use format like '1h', '30m', or '2d'",
+                },
+                { status: 400 },
+            );
         }
 
         // Convert File to Buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        const resp = await Waifuvault.uploadFile({
+        // Prepare upload options
+        const uploadOptions: FileUpload = {
             file: buffer,
-            filename: file.name || "upload",
+            filename: file.name ?? "upload",
             bucketToken: bucketToken,
-        });
+        };
+
+        // Add optional parameters if they exist and are not empty
+        if (options.expires && options.expires.trim() !== "") {
+            uploadOptions.expires = options.expires;
+        }
+
+        if (options.hideFilename === true) {
+            uploadOptions.hideFilename = true;
+        }
+
+        if (options.password && options.password.trim() !== "") {
+            uploadOptions.password = options.password;
+        }
+
+        if (options.oneTimeDownload === true) {
+            uploadOptions.oneTimeDownload = true;
+        }
+
+        // If a custom bucketToken is provided in options, use it instead
+        if (options.bucketToken && options.bucketToken.trim() !== "") {
+            uploadOptions.bucketToken = options.bucketToken;
+        }
+
+        const resp = await Waifuvault.uploadFile(uploadOptions);
 
         return NextResponse.json(resp);
     } catch (error) {

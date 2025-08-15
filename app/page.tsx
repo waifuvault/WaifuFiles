@@ -2,7 +2,7 @@
 
 import React, { DragEvent, useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
-import { WaifuFile } from "waifuvault-node-api";
+import { FileUpload, WaifuFile } from "waifuvault-node-api";
 
 interface UploadItem {
     file: File;
@@ -10,6 +10,8 @@ interface UploadItem {
     result?: WaifuFile;
     error?: string;
     progress?: number;
+    options: Partial<FileUpload>;
+    showOptions?: boolean;
 }
 
 interface Restriction {
@@ -52,6 +54,7 @@ export default function Home() {
                     file,
                     status: "error" as const,
                     error: `File too large (${formatFileSize(file.size)}). Max size: ${formatFileSize(maxFileSize)}`,
+                    options: {},
                 };
             }
 
@@ -60,12 +63,14 @@ export default function Home() {
                     file,
                     status: "error" as const,
                     error: `File type not allowed: ${file.type}`,
+                    options: {},
                 };
             }
 
             return {
                 file,
                 status: "pending" as const,
+                options: {},
             };
         });
         setUploads(prev => [...prev, ...newUploads]);
@@ -73,7 +78,9 @@ export default function Home() {
 
     const uploadFile = async (uploadIndex: number) => {
         const upload = uploads[uploadIndex];
-        if (!upload || upload.status !== "pending") return;
+        if (!upload || upload.status !== "pending") {
+            return;
+        }
 
         setUploads(prev =>
             prev.map((item, index) => (index === uploadIndex ? { ...item, status: "uploading", progress: 0 } : item)),
@@ -82,6 +89,7 @@ export default function Home() {
         try {
             const formData = new FormData();
             formData.append("file", upload.file);
+            formData.append("options", JSON.stringify(upload.options));
 
             const response = await fetch("/api/upload", {
                 method: "POST",
@@ -95,7 +103,7 @@ export default function Home() {
                     throw new Error(`${errorData.name}: ${errorData.error}`);
                 }
 
-                throw new Error(errorData.error || "Upload failed");
+                throw new Error(errorData.error ?? "Upload failed");
             }
 
             const result = await response.json();
@@ -113,6 +121,32 @@ export default function Home() {
                 ),
             );
         }
+    };
+
+    const resetToPending = (uploadIndex: number) => {
+        setUploads(prev =>
+            prev.map((item, index) =>
+                index === uploadIndex ? { ...item, status: "pending", error: undefined } : item,
+            ),
+        );
+    };
+
+    const updateUploadOptions = (uploadIndex: number, options: Partial<FileUpload>) => {
+        setUploads(prev =>
+            prev.map((item, index) =>
+                index === uploadIndex ? { ...item, options: { ...item.options, ...options } } : item,
+            ),
+        );
+    };
+
+    const toggleOptions = (uploadIndex: number) => {
+        setUploads(prev =>
+            prev.map((item, index) => (index === uploadIndex ? { ...item, showOptions: !item.showOptions } : item)),
+        );
+    };
+
+    const validateExpires = (expires: string): boolean => {
+        return /^$|^\d+[mhd]$/.test(expires);
     };
 
     const uploadAll = async () => {
@@ -244,59 +278,165 @@ export default function Home() {
                     <div className={styles.uploadList}>
                         {uploads.map((upload, index) => (
                             <div key={index} className={`${styles.uploadItem} ${styles[upload.status]}`}>
-                                <div className={styles.fileInfo}>
-                                    <span className={styles.fileName}>{upload.file.name}</span>
-                                    <span className={styles.fileSize}>{formatFileSize(upload.file.size)}</span>
+                                <div className={styles.uploadItemHeader}>
+                                    <div className={styles.fileInfo}>
+                                        <span className={styles.fileName}>{upload.file.name}</span>
+                                        <span className={styles.fileSize}>{formatFileSize(upload.file.size)}</span>
+                                    </div>
+
+                                    <div className={styles.uploadStatus}>
+                                        {upload.status === "pending" && (
+                                            <>
+                                                <button
+                                                    onClick={() => toggleOptions(index)}
+                                                    className={styles.optionsBtn}
+                                                    title="Upload Options"
+                                                >
+                                                    ⚙️
+                                                </button>
+                                                <button onClick={() => uploadFile(index)} className={styles.uploadBtn}>
+                                                    Upload
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {upload.status === "uploading" && (
+                                            <div className={styles.uploading}>
+                                                <div className={styles.spinner}></div>
+                                                <span>Uploading...</span>
+                                            </div>
+                                        )}
+
+                                        {upload.status === "completed" && upload.result && (
+                                            <div className={styles.completed}>
+                                                <input
+                                                    type="text"
+                                                    value={upload.result.url}
+                                                    readOnly
+                                                    className={styles.urlInput}
+                                                />
+                                                <button
+                                                    onClick={() => copyToClipboard(upload.result!.url)}
+                                                    className={styles.copyBtn}
+                                                >
+                                                    Copy
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {upload.status === "error" && (
+                                            <div className={styles.error}>
+                                                <span title={upload.error}>
+                                                    {upload.error && upload.error.length > 50
+                                                        ? `${upload.error.substring(0, 50)}...`
+                                                        : (upload.error ?? "Failed")}
+                                                </span>
+                                                <div className={styles.errorActions}>
+                                                    <button
+                                                        onClick={() => uploadFile(index)}
+                                                        className={styles.retryBtn}
+                                                    >
+                                                        Retry
+                                                    </button>
+                                                    <button
+                                                        onClick={() => resetToPending(index)}
+                                                        className={styles.backToOptionsBtn}
+                                                    >
+                                                        Back to Options
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <button onClick={() => removeUpload(index)} className={styles.removeBtn}>
+                                        ✕
+                                    </button>
                                 </div>
 
-                                <div className={styles.uploadStatus}>
-                                    {upload.status === "pending" && (
-                                        <button onClick={() => uploadFile(index)} className={styles.uploadBtn}>
-                                            Upload
-                                        </button>
-                                    )}
+                                {upload.showOptions && upload.status === "pending" && (
+                                    <div className={styles.optionsPanel}>
+                                        <h4>Upload Options</h4>
 
-                                    {upload.status === "uploading" && (
-                                        <div className={styles.uploading}>
-                                            <div className={styles.spinner}></div>
-                                            <span>Uploading...</span>
+                                        <div className={styles.optionRow}>
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={upload.options.hideFilename ?? false}
+                                                    onChange={e =>
+                                                        updateUploadOptions(index, { hideFilename: e.target.checked })
+                                                    }
+                                                />
+                                                Hide filename in URL
+                                            </label>
                                         </div>
-                                    )}
 
-                                    {upload.status === "completed" && upload.result && (
-                                        <div className={styles.completed}>
+                                        <div className={styles.optionRow}>
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={upload.options.oneTimeDownload ?? false}
+                                                    onChange={e =>
+                                                        updateUploadOptions(index, {
+                                                            oneTimeDownload: e.target.checked,
+                                                        })
+                                                    }
+                                                />
+                                                One-time download (delete after first access)
+                                            </label>
+                                        </div>
+
+                                        <div className={styles.optionRow}>
+                                            <label>Password (encrypts file):</label>
+                                            <input
+                                                type="password"
+                                                placeholder="Optional password"
+                                                value={upload.options.password ?? ""}
+                                                onChange={e => updateUploadOptions(index, { password: e.target.value })}
+                                                className={styles.optionInput}
+                                            />
+                                        </div>
+
+                                        <div className={styles.optionRow}>
+                                            <label>Expires (e.g., 1h, 30m, 2d):</label>
                                             <input
                                                 type="text"
-                                                value={upload.result.url}
-                                                readOnly
-                                                className={styles.urlInput}
+                                                placeholder="Optional expiry (1h, 30m, 2d)"
+                                                value={upload.options.expires ?? ""}
+                                                onChange={e => {
+                                                    const value = e.target.value;
+                                                    updateUploadOptions(index, { expires: value });
+                                                    if (value === "" || validateExpires(value)) {
+                                                        e.target.setCustomValidity("");
+                                                    } else {
+                                                        e.target.setCustomValidity(
+                                                            "Format: number + m/h/d (e.g., 1h, 30m, 2d)",
+                                                        );
+                                                    }
+                                                }}
+                                                className={styles.optionInput}
+                                                pattern="^$|^\d+[mhd]$"
+                                                title="Format: number + m/h/d (e.g., 1h, 30m, 2d)"
                                             />
-                                            <button
-                                                onClick={() => copyToClipboard(upload.result!.url)}
-                                                className={styles.copyBtn}
-                                            >
-                                                Copy
-                                            </button>
                                         </div>
-                                    )}
 
-                                    {upload.status === "error" && (
-                                        <div className={styles.error}>
-                                            <span title={upload.error}>
-                                                {upload.error && upload.error.length > 50
-                                                    ? `${upload.error.substring(0, 50)}...`
-                                                    : upload.error || "Failed"}
-                                            </span>
-                                            <button onClick={() => uploadFile(index)} className={styles.retryBtn}>
-                                                Retry
-                                            </button>
+                                        <div className={styles.optionsSummary}>
+                                            {Object.keys(upload.options).length > 0 && (
+                                                <div>
+                                                    <strong>Active options:</strong>
+                                                    <ul>
+                                                        {upload.options.hideFilename && <li>Hide filename</li>}
+                                                        {upload.options.oneTimeDownload && <li>One-time download</li>}
+                                                        {upload.options.password && <li>Password protected</li>}
+                                                        {upload.options.expires && (
+                                                            <li>Expires in {upload.options.expires}</li>
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-
-                                <button onClick={() => removeUpload(index)} className={styles.removeBtn}>
-                                    ✕
-                                </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

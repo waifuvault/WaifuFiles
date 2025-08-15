@@ -32,8 +32,9 @@ export const metadata: Metadata = {
         images: ["https://waifuvault.moe/assets/custom/images/vic_vault.webp"],
     },
     icons: {
-        icon: "/favicon.ico", // Only if you have this file
-        shortcut: "/favicon.ico",
+        icon: "/favicon.svg",
+        shortcut: "/favicon.svg",
+        apple: "/favicon.svg",
     },
     manifest: "/site.webmanifest",
 };
@@ -47,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
             <head>
-                <link rel="icon" href="/favicon.ico" sizes="32x32" />
+                <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
                 <link rel="manifest" href="/site.webmanifest" />
                 <meta name="theme-color" content="#667eea" />
             </head>
