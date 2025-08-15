@@ -166,7 +166,11 @@ export default function Home() {
 
     const handleDragLeave = (e: DragEvent) => {
         e.preventDefault();
-        setIsDragging(false);
+        const dropzoneElement = e.currentTarget as HTMLElement;
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        if (!relatedTarget || !dropzoneElement.contains(relatedTarget)) {
+            setIsDragging(false);
+        }
     };
 
     const handleDragOver = (e: DragEvent) => {
