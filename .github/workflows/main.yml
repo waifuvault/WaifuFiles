@@ -1,0 +1,32 @@
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  waifuvault-uploader-build:
+    name: Build Waifuvault Uploader
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check Prettier formatting
+        run: npm run prettier
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build

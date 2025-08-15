@@ -8,8 +8,10 @@
     "build": "next build",
     "start": "next start -H localhost",
     "lint": "next lint",
+    "lint:fix": "next lint --fix .",
     "prettier": "prettier ./app --check",
-    "prettier:fix": "prettier ./app --write"
+    "prettier:fix": "prettier ./app --write",
+    "prepare": "husky"
   },
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
@@ -24,7 +26,22 @@
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.33.0",
     "eslint-config-next": "^15.4.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
+    "tsc-files": "^1.1.4",
     "typescript": "^5.9.2"
+  },
+  "lint-staged": {
+    "app/**/*.{ts,tsx}": [
+      "tsc-files --noEmit --pretty"
+    ],
+    "app/**/*.{ts,tsx,js,jsx}": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ],
+    "app/**/*.{css,scss,less,json,md,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }
