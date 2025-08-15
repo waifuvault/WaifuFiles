@@ -7,6 +7,7 @@ import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize } from "./utils/upload";
 import UploadQueue from "./components/UploadQueue";
 import EnhancedDropZone from "@/app/components/EnhancedDropZone";
+import ThemeSelector from "@/app/components/ThemeSelector";
 
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
@@ -228,6 +229,12 @@ export default function Home(): ReactElement {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
+                <div className={styles.headerTop}>
+                    <div className={styles.headerTopContent}>
+                        <ThemeSelector />
+                    </div>
+                </div>
+
                 <div className={styles.logo}>
                     <a href={"https://waifuvault.moe"} target="_blank" rel="noopener noreferrer">
                         <div className={styles.logoImage}></div>

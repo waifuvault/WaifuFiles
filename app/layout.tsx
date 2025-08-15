@@ -1,6 +1,8 @@
 import "./globals.css";
+import "./themes.css";
 import type { Metadata, Viewport } from "next";
 import React from "react";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const opts = {
@@ -53,7 +55,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel="manifest" href="/site.webmanifest" />
                 <meta name="theme-color" content="#667eea" />
             </head>
-            <body>{children}</body>
+            <body>
+                <ThemeProvider>{children}</ThemeProvider>
+            </body>
         </html>
     );
 }

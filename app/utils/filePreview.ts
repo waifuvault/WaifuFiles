@@ -228,6 +228,23 @@ export const getFileIcon = (file: File): string => {
         case "jsx":
         case "tsx":
             return "bi-file-code";
+        case "sql":
+            return "bi-filetype-sql";
+        case "css":
+            return "bi-filetype-css";
+        case "html":
+            return "bi-filetype-html";
+        case "xml":
+            return "bi-filetype-xml";
+        case "java":
+            return "bi-filetype-java";
+        case "yaml":
+        case "yml":
+            return "bi-filetype-yml";
+        case "py":
+            return "bi-filetype-py";
+        case "sh":
+            return "bi-filetype-sh";
 
         // Data files
         case "json":
