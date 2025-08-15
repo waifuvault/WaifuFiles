@@ -5,10 +5,10 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     font-family:
-            "Inter",
-            -apple-system,
-            BlinkMacSystemFont,
-            sans-serif;
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
     position: relative;
     overflow-x: hidden;
 }
@@ -427,14 +427,14 @@
     bottom: 0;
     right: 0;
     background-image: linear-gradient(
-            -45deg,
-            rgba(255, 255, 255, 0.2) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0.2) 75%,
-            transparent 75%,
-            transparent
+        -45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
     );
     background-size: 20px 20px;
     animation: progressStripes 1s linear infinite;

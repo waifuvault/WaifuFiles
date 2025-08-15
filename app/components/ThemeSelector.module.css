@@ -47,7 +47,6 @@
     color: var(--theme-text, #ffffff);
 }
 
-
 .chevron {
     font-size: 0.7rem;
     transition: transform 0.2s ease;
@@ -290,7 +289,6 @@
 .previewterminal .previewButton {
     background: #00ff00;
 }
-
 
 .themeInfo {
     flex: 1;

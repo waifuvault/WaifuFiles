@@ -12,9 +12,10 @@
     --border-primary: rgba(255, 255, 255, 0.2);
     --border-secondary: rgba(255, 255, 255, 0.1);
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-bg: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    --gradient-bg:
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
     --success-color: #28a745;
     --error-color: #dc3545;
     --warning-color: #ffc107;
@@ -34,9 +35,10 @@
     --border-primary: rgba(0, 255, 255, 0.5);
     --border-secondary: rgba(0, 255, 255, 0.2);
     --gradient-primary: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #ffff00 100%);
-    --gradient-bg: radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.1) 0%, transparent 50%);
+    --gradient-bg:
+        radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.1) 0%, transparent 50%);
     --success-color: #00ff00;
     --error-color: #ff0040;
     --warning-color: #ffff00;
@@ -56,8 +58,9 @@
     --border-primary: rgba(0, 255, 0, 0.5);
     --border-secondary: rgba(0, 255, 0, 0.2);
     --gradient-primary: linear-gradient(135deg, #00ff00 0%, #008000 100%);
-    --gradient-bg: radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(0, 128, 0, 0.05) 0%, transparent 50%);
+    --gradient-bg:
+        radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 128, 0, 0.05) 0%, transparent 50%);
     --success-color: #00ff00;
     --error-color: #ff4444;
     --warning-color: #ffff00;
@@ -144,10 +147,12 @@ body {
 }
 
 @keyframes terminalBlink {
-    0%, 50% {
+    0%,
+    50% {
         opacity: 1;
     }
-    51%, 100% {
+    51%,
+    100% {
         opacity: 0.8;
     }
 }
@@ -174,10 +179,12 @@ body {
 }
 
 @keyframes terminalCursor {
-    0%, 50% {
+    0%,
+    50% {
         opacity: 1;
     }
-    51%, 100% {
+    51%,
+    100% {
         opacity: 0;
     }
 }
