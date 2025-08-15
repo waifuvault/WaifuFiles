@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        // Parse the FormData from the request
         const formData = await req.formData();
         const file = formData.get("file") as File;
         const optionsString = formData.get("options") as string;
@@ -18,7 +17,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
         }
 
-        // Parse options if provided
         let options: Partial<FileUpload> = {};
         if (optionsString) {
             try {
@@ -28,7 +26,6 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Validate expires format if provided
         if (options.expires && !/^$|^\d+[mhd]$/.test(options.expires)) {
             return NextResponse.json(
                 {
@@ -38,18 +35,17 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Convert File to Buffer
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Prepare upload options
+
         const uploadOptions: FileUpload = {
             file: buffer,
             filename: file.name ?? "upload",
             bucketToken: bucketToken,
         };
 
-        // Add optional parameters if they exist and are not empty
         if (options.expires && options.expires.trim() !== "") {
             uploadOptions.expires = options.expires;
         }
@@ -66,7 +62,6 @@ export async function POST(req: NextRequest) {
             uploadOptions.oneTimeDownload = true;
         }
 
-        // If a custom bucketToken is provided in options, use it instead
         if (options.bucketToken && options.bucketToken.trim() !== "") {
             uploadOptions.bucketToken = options.bucketToken;
         }
@@ -77,7 +72,6 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error("Upload error:", error);
 
-        // Check if it's a WaifuVault API error
         if (error && typeof error === "object" && "name" in error && "message" in error && "status" in error) {
             const waifuError = error as WaifuError;
             return NextResponse.json(
@@ -90,7 +84,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Generic error fallback
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 }
