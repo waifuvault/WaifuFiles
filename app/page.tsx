@@ -79,10 +79,8 @@ export default function Home(): ReactElement {
             formData.append("file", upload.file);
             formData.append("options", JSON.stringify(upload.options));
 
-            // Create XMLHttpRequest for progress tracking
             const xhr = new XMLHttpRequest();
 
-            // Set up progress tracking
             xhr.upload.addEventListener("progress", event => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -94,7 +92,6 @@ export default function Home(): ReactElement {
                 }
             });
 
-            // When upload is complete, switch to processing
             xhr.upload.addEventListener("loadend", () => {
                 setUploads(prev =>
                     prev.map((item, index) =>
@@ -103,7 +100,7 @@ export default function Home(): ReactElement {
                 );
             });
 
-            // Create a promise to handle the XMLHttpRequest
+            // Create a promise to handle the XMLHttpRequest - can't use fetch
             const uploadPromise = new Promise<WaifuFile>((resolve, reject) => {
                 xhr.onload = () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
@@ -191,7 +188,6 @@ export default function Home(): ReactElement {
 
     const handleDragLeave = (e: DragEvent) => {
         e.preventDefault();
-        // Check if we're actually leaving the dropzone, not just entering a child element
         const dropzoneElement = e.currentTarget as HTMLElement;
         const relatedTarget = e.relatedTarget as HTMLElement;
 
