@@ -34,6 +34,14 @@ export const getFileType = (file: File): FilePreview["type"] => {
 
 export const generateImagePreview = (file: File): Promise<FilePreview> => {
     return new Promise(resolve => {
+        const maxSizeBytes = 25 * 1024 * 1024; // 25MB
+        if (file.size > maxSizeBytes) {
+            resolve({
+                type: "image",
+            });
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = e => {
             resolve({
