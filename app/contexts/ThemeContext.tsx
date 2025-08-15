@@ -35,6 +35,13 @@ export const themes: Theme[] = [
         icon: "bi-terminal", // Terminal icon
     },
     {
+        id: "orangeterminal",
+        name: "Terminal Orange",
+        description: "Orange-on-black terminal style",
+        preview: "💻",
+        icon: "bi-terminal", // Terminal icon
+    },
+    {
         id: "minimal",
         name: "Minimal",
         description: "Light and simple design",
