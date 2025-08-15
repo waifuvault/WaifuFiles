@@ -2,7 +2,7 @@ import { FileUpload, WaifuFile } from "waifuvault-node-api";
 
 export interface UploadItem {
     file: File;
-    status: "pending" | "uploading" | "completed" | "error";
+    status: "pending" | "uploading" | "processing" | "completed" | "error";
     result?: WaifuFile;
     error?: string;
     progress?: number;

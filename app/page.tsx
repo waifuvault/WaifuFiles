@@ -1,14 +1,14 @@
 "use client";
 
-import React, { DragEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { FileUpload } from "waifuvault-node-api";
+import { FileUpload, WaifuFile } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize } from "./utils/upload";
 import DropZone from "./components/DropZone";
 import UploadQueue from "./components/UploadQueue";
 
-export default function Home() {
+export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadItem[]>([]);
     const [maxFileSize, setMaxFileSize] = useState<number>(1048576000); // Default 1GB
@@ -35,7 +35,7 @@ export default function Home() {
         fetchRestrictions();
     }, []);
 
-    const addFiles = (files: FileList) => {
+    const addFiles = (files: FileList): void => {
         const newUploads: UploadItem[] = Array.from(files).map(file => {
             if (file.size > maxFileSize) {
                 return {
@@ -79,22 +79,63 @@ export default function Home() {
             formData.append("file", upload.file);
             formData.append("options", JSON.stringify(upload.options));
 
-            const response = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
+            // Create XMLHttpRequest for progress tracking
+            const xhr = new XMLHttpRequest();
+
+            // Set up progress tracking
+            xhr.upload.addEventListener("progress", event => {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    setUploads(prev =>
+                        prev.map((item, index) =>
+                            index === uploadIndex ? { ...item, progress: percentComplete } : item,
+                        ),
+                    );
+                }
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            // When upload is complete, switch to processing
+            xhr.upload.addEventListener("loadend", () => {
+                setUploads(prev =>
+                    prev.map((item, index) =>
+                        index === uploadIndex ? { ...item, status: "processing", progress: 100 } : item,
+                    ),
+                );
+            });
 
-                if (errorData.name && errorData.status) {
-                    throw new Error(`${errorData.name}: ${errorData.error}`);
-                }
+            // Create a promise to handle the XMLHttpRequest
+            const uploadPromise = new Promise<WaifuFile>((resolve, reject) => {
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            resolve(response);
+                        } catch {
+                            reject(new Error("Invalid JSON response"));
+                        }
+                    } else {
+                        try {
+                            const errorData = JSON.parse(xhr.responseText);
+                            if (errorData.name && errorData.status) {
+                                reject(new Error(`${errorData.name}: ${errorData.error}`));
+                            } else {
+                                reject(new Error(errorData.error ?? "Upload failed"));
+                            }
+                        } catch {
+                            reject(new Error(`Upload failed with status ${xhr.status}`));
+                        }
+                    }
+                };
 
-                throw new Error(errorData.error ?? "Upload failed");
-            }
+                xhr.onerror = () => {
+                    reject(new Error("Network error occurred"));
+                };
 
-            const result = await response.json();
+                xhr.open("POST", "/api/upload");
+                xhr.send(formData);
+            });
+
+            const result = await uploadPromise;
 
             setUploads(prev =>
                 prev.map((item, index) =>
@@ -173,7 +214,7 @@ export default function Home() {
         }
     };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             addFiles(files);

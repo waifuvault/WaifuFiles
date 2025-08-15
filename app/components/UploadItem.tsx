@@ -60,8 +60,22 @@ export default function UploadItem({
 
                     {upload.status === "uploading" && (
                         <div className={styles.uploading}>
+                            <div className={styles.progressContainer}>
+                                <div className={styles.progressBar}>
+                                    <div
+                                        className={styles.progressFill}
+                                        style={{ width: `${upload.progress ?? 0}%` }}
+                                    ></div>
+                                </div>
+                                <span className={styles.progressText}>{upload.progress ?? 0}%</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {upload.status === "processing" && (
+                        <div className={styles.processing}>
                             <div className={styles.spinner}></div>
-                            <span>Uploading...</span>
+                            <span>Processing...</span>
                         </div>
                     )}
 
