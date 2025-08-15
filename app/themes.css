@@ -73,7 +73,7 @@
 [data-theme="orangeterminal"] {
     --bg-primary: #000000;
     --bg-secondary: rgba(255, 165, 0, 0.05); /* light orange tint */
-    --bg-tertiary: rgba(255, 165, 0, 0.1);   /* stronger orange tint */
+    --bg-tertiary: rgba(255, 165, 0, 0.1); /* stronger orange tint */
     --text-primary: #ffa500; /* bright orange */
     --text-secondary: #cc8400; /* darker burnt orange */
     --text-accent: #ffb733; /* softer amber accent */
@@ -81,8 +81,8 @@
     --border-secondary: rgba(255, 165, 0, 0.2);
     --gradient-primary: linear-gradient(135deg, #ffa500 0%, #cc8400 100%);
     --gradient-bg:
-            radial-gradient(circle at 20% 80%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(204, 132, 0, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(204, 132, 0, 0.05) 0%, transparent 50%);
     --success-color: #ffa500;
     --error-color: #ff4444;
     --warning-color: #ffff00;
