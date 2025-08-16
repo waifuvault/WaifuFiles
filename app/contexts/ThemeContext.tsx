@@ -28,16 +28,16 @@ export const themes: Theme[] = [
         preview: "🌃",
     },
     {
-        description: "Green-on-black terminal style",
+        description: "Green phosphor terminal style",
         icon: "bi-terminal", // Terminal icon
         id: "terminal",
-        name: "Terminal",
+        name: "Green Phosphor",
         preview: "💻",
     },
     {
         id: "orangeterminal",
-        name: "Terminal Orange",
-        description: "Orange-on-black terminal style",
+        name: "Amber Phosphor",
+        description: "Amber phosphor terminal style",
         preview: "💻",
         icon: "bi-terminal", // Terminal icon
     },
