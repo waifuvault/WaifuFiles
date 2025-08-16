@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 interface Restriction {
     type: string;
-    value: string | number;
+    value: number | string;
 }
 
 export async function GET() {
@@ -13,7 +13,7 @@ export async function GET() {
             throw new Error("Failed to fetch restrictions");
         }
 
-        const restrictions: Restriction[] = await response.json();
+        const restrictions = (await response.json()) as Restriction[];
 
         return NextResponse.json(restrictions, {
             headers: {
@@ -26,7 +26,7 @@ export async function GET() {
         const defaultRestrictions: Restriction[] = [
             {
                 type: "MAX_FILE_SIZE",
-                value: 1048576000, // 1GB default
+                value: 1_048_576_000, // 1GB default
             },
             {
                 type: "BANNED_MIME_TYPE",

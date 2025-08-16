@@ -2,37 +2,37 @@
 
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
-export type ThemeType = "anime" | "cyberpunk" | "terminal" | "minimal";
-
 export interface Theme {
+    description: string;
+    icon: string; // Add icon property
     id: string;
     name: string;
-    description: string;
     preview: string;
-    icon: string; // Add icon property
 }
+
+export type ThemeType = "anime" | "cyberpunk" | "minimal" | "terminal";
 
 export const themes: Theme[] = [
     {
+        description: "Gradient theme with sparkles",
+        icon: "bi-stars", // Sparkles/stars for anime theme
         id: "anime",
         name: "Anime",
-        description: "Gradient theme with sparkles",
         preview: "🌸",
-        icon: "bi-stars", // Sparkles/stars for anime theme
     },
     {
+        description: "Neon lights",
+        icon: "bi-cpu", // CPU/tech icon for cyberpunk
         id: "cyberpunk",
         name: "Cyberpunk",
-        description: "Neon lights",
         preview: "🌃",
-        icon: "bi-cpu", // CPU/tech icon for cyberpunk
     },
     {
+        description: "Green-on-black terminal style",
+        icon: "bi-terminal", // Terminal icon
         id: "terminal",
         name: "Terminal",
-        description: "Green-on-black terminal style",
         preview: "💻",
-        icon: "bi-terminal", // Terminal icon
     },
     {
         id: "orangeterminal",
@@ -42,11 +42,11 @@ export const themes: Theme[] = [
         icon: "bi-terminal", // Terminal icon
     },
     {
+        description: "Light and simple design",
+        icon: "bi-circle", // Clean circle for minimal
         id: "minimal",
         name: "Minimal",
-        description: "Light and simple design",
         preview: "⚪",
-        icon: "bi-circle", // Clean circle for minimal
     },
 ];
 
@@ -74,7 +74,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }, []);
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", currentTheme);
+        document.documentElement.dataset.theme = currentTheme;
         localStorage.setItem("waifuvault-theme", currentTheme);
     }, [currentTheme]);
 

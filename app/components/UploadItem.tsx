@@ -7,23 +7,23 @@ import FilePreview from "./FilePreview";
 import { UploadItem as UploadItemType } from "../types/upload";
 
 interface UploadItemProps {
-    upload: UploadItemType;
     index: number;
-    onUpload: (index: number) => void;
     onRemove: (index: number) => void;
     onResetToPending: (index: number) => void;
     onToggleOptions: (index: number) => void;
     onUpdateOptions: (index: number, options: Partial<FileUpload>) => void;
+    onUpload: (index: number) => void;
+    upload: UploadItemType;
 }
 
 export default function UploadItem({
-    upload,
     index,
-    onUpload,
     onRemove,
     onResetToPending,
     onToggleOptions,
     onUpdateOptions,
+    onUpload,
+    upload,
 }: UploadItemProps) {
     const [copied, setCopied] = useState(false);
 
@@ -38,8 +38,12 @@ export default function UploadItem({
         if (!copied) {
             return;
         }
-        const timer = setTimeout(() => setCopied(false), 5000);
-        return () => clearTimeout(timer);
+        const timer = setTimeout(() => {
+            setCopied(false);
+        }, 5000);
+        return () => {
+            clearTimeout(timer);
+        };
     }, [copied]);
 
     const handleOptionsChange = (options: Partial<FileUpload>) => {
@@ -60,14 +64,21 @@ export default function UploadItem({
                     {upload.status === "pending" && (
                         <>
                             <button
-                                onClick={() => onToggleOptions(index)}
-                                className={styles.optionsBtn}
-                                title="Upload Options"
                                 aria-label="Upload Options"
+                                className={styles.optionsBtn}
+                                onClick={() => {
+                                    onToggleOptions(index);
+                                }}
+                                title="Upload Options"
                             >
-                                <i className="bi bi-gear" aria-hidden="true"></i>
+                                <i aria-hidden="true" className="bi bi-gear"></i>
                             </button>
-                            <button onClick={() => onUpload(index)} className={styles.uploadBtn}>
+                            <button
+                                className={styles.uploadBtn}
+                                onClick={() => {
+                                    onUpload(index);
+                                }}
+                            >
                                 Upload
                             </button>
                         </>
@@ -96,8 +107,8 @@ export default function UploadItem({
 
                     {upload.status === "completed" && upload.result && (
                         <div className={styles.completed}>
-                            <input type="text" value={upload.result.url} readOnly className={styles.urlInput} />
-                            <button onClick={handleCopy} className={styles.copyBtn}>
+                            <input className={styles.urlInput} readOnly type="text" value={upload.result.url} />
+                            <button className={styles.copyBtn} onClick={handleCopy}>
                                 {copied ? "Copied" : "Copy"}
                             </button>
                         </div>
@@ -107,14 +118,24 @@ export default function UploadItem({
                         <div className={styles.error}>
                             <span title={upload.error}>
                                 {upload.error && upload.error.length > 50
-                                    ? `${upload.error.substring(0, 50)}...`
+                                    ? `${upload.error.slice(0, 50)}...`
                                     : (upload.error ?? "Failed")}
                             </span>
                             <div className={styles.errorActions}>
-                                <button onClick={() => onUpload(index)} className={styles.retryBtn}>
+                                <button
+                                    className={styles.retryBtn}
+                                    onClick={() => {
+                                        onUpload(index);
+                                    }}
+                                >
                                     Retry
                                 </button>
-                                <button onClick={() => onResetToPending(index)} className={styles.backToOptionsBtn}>
+                                <button
+                                    className={styles.backToOptionsBtn}
+                                    onClick={() => {
+                                        onResetToPending(index);
+                                    }}
+                                >
                                     Back to Options
                                 </button>
                             </div>
@@ -122,13 +143,19 @@ export default function UploadItem({
                     )}
                 </div>
 
-                <button onClick={() => onRemove(index)} className={styles.removeBtn} aria-label="Remove">
-                    <i className="bi bi-x-lg" aria-hidden="true"></i>
+                <button
+                    aria-label="Remove"
+                    className={styles.removeBtn}
+                    onClick={() => {
+                        onRemove(index);
+                    }}
+                >
+                    <i aria-hidden="true" className="bi bi-x-lg"></i>
                 </button>
             </div>
 
             {upload.showOptions && upload.status === "pending" && (
-                <OptionsPanel options={upload.options} onOptionsChange={handleOptionsChange} />
+                <OptionsPanel onOptionsChange={handleOptionsChange} options={upload.options} />
             )}
         </div>
     );
