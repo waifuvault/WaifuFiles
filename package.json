@@ -17,7 +17,7 @@
     "prettier": "prettier ./app --check",
     "prettier:fix": "prettier ./app --write",
     "prepare": "husky",
-    "type-check": "tsc --noEmit --incremental false"
+    "type-check": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
@@ -49,14 +49,9 @@
     "typescript-eslint": "^8.39.1"
   },
   "lint-staged": {
-    "app/**/*.{ts,tsx}": [
-      "npm run type-check"
-    ],
+    "app/**/*.{ts,tsx}": "npm run type-check",
     "app/**/*.{ts,tsx,js,jsx}": [
       "eslint --cache --fix",
-      "prettier --write"
-    ],
-    "app/**/*.{css,scss,less,json,md,yaml,yml}": [
       "prettier --write"
     ]
   }
