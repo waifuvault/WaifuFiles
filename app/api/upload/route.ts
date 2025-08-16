@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
 
         const uploadOptions: FileUpload = {
+            bucketToken,
             file: buffer,
             filename: file.name ?? "upload",
-            bucketToken: bucketToken,
         };
 
         if (options.expires && options.expires.trim() !== "") {

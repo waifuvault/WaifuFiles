@@ -4,7 +4,7 @@ import { FilePreview as FilePreviewType, generateFilePreview, getFileIcon } from
 
 interface FilePreviewProps {
     file: File;
-    size?: "small" | "medium" | "large";
+    size?: "large" | "medium" | "small";
 }
 
 export default function FilePreview({ file, size = "medium" }: FilePreviewProps) {
@@ -13,7 +13,7 @@ export default function FilePreview({ file, size = "medium" }: FilePreviewProps)
 
     useEffect(() => {
         let mounted = true;
-        let urlToRevoke: string | null = null;
+        let urlToRevoke: null | string = null;
 
         const loadPreview = async () => {
             try {
@@ -21,15 +21,15 @@ export default function FilePreview({ file, size = "medium" }: FilePreviewProps)
                 if (mounted) {
                     setPreview(previewData);
                     setIsLoading(false);
-                    if (previewData.url && previewData.url.startsWith("blob:")) {
+                    if (previewData.url?.startsWith("blob:")) {
                         urlToRevoke = previewData.url;
                     }
                 }
             } catch {
                 if (mounted) {
                     setPreview({
-                        type: "unknown",
                         error: "Failed to generate preview",
+                        type: "unknown",
                     });
                     setIsLoading(false);
                 }
@@ -60,7 +60,7 @@ export default function FilePreview({ file, size = "medium" }: FilePreviewProps)
         return (
             <div className={`${styles.filePreview} ${styles[sizeClass]} ${styles.error}`}>
                 <span className={styles.fileIcon}>
-                    <i className={`bi ${getFileIcon(file)}`} aria-hidden="true"></i>
+                    <i aria-hidden="true" className={`bi ${getFileIcon(file)}`}></i>
                 </span>
                 {preview?.error && size !== "small" && <span className={styles.errorText}>{preview.error}</span>}
             </div>
@@ -69,41 +69,11 @@ export default function FilePreview({ file, size = "medium" }: FilePreviewProps)
 
     const renderPreviewContent = () => {
         switch (preview.type) {
-            case "image":
-                return preview.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={preview.url}
-                        alt={file.name}
-                        className={styles.previewImage}
-                        onError={() => setPreview({ ...preview, error: "Failed to load image" })}
-                    />
-                ) : (
-                    <span className={styles.fileIcon}>
-                        <i className={`bi ${getFileIcon(file)}`} aria-hidden="true"></i>
-                    </span>
-                );
-
-            case "video":
-                return preview.url ? (
-                    <div className={styles.videoPreview}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={preview.url} alt={`${file.name} thumbnail`} className={styles.previewImage} />
-                        <div className={styles.playOverlay}>
-                            <i className="bi bi-play-fill" aria-hidden="true"></i>
-                        </div>
-                    </div>
-                ) : (
-                    <span className={styles.fileIcon}>
-                        <i className="bi bi-file-earmark-play" aria-hidden="true"></i>
-                    </span>
-                );
-
-            case "audio":
+            case "audio": {
                 return (
                     <div className={styles.audioPreview}>
                         <span className={styles.fileIcon}>
-                            <i className="bi bi-music-note-beamed" aria-hidden="true"></i>
+                            <i aria-hidden="true" className="bi bi-music-note-beamed"></i>
                         </span>
                         {size !== "small" && (
                             <div className={styles.audioWaves}>
@@ -115,37 +85,75 @@ export default function FilePreview({ file, size = "medium" }: FilePreviewProps)
                         )}
                     </div>
                 );
+            }
 
-            case "text":
-                return size === "small" ? (
-                    <span className={styles.fileIcon}>
-                        <i className="bi bi-file-text" aria-hidden="true"></i>
-                    </span>
+            case "image": {
+                return preview.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        alt={file.name}
+                        className={styles.previewImage}
+                        onError={() => {
+                            setPreview({ ...preview, error: "Failed to load image" });
+                        }}
+                        src={preview.url}
+                    />
                 ) : (
-                    <div className={styles.textPreview}>
-                        <span className={styles.fileIcon}>
-                            <i className="bi bi-file-text" aria-hidden="true"></i>
-                        </span>
-                        {preview.content && <div className={styles.textContent}>{preview.content}</div>}
-                    </div>
+                    <span className={styles.fileIcon}>
+                        <i aria-hidden="true" className={`bi ${getFileIcon(file)}`}></i>
+                    </span>
                 );
+            }
 
-            case "pdf":
+            case "pdf": {
                 return (
                     <div className={styles.pdfPreview}>
                         <span className={styles.fileIcon}>
-                            <i className="bi bi-filetype-pdf" aria-hidden="true"></i>
+                            <i aria-hidden="true" className="bi bi-filetype-pdf"></i>
                         </span>
                         {size !== "small" && <span className={styles.fileType}>PDF</span>}
                     </div>
                 );
+            }
 
-            default:
-                return (
+            case "text": {
+                return size === "small" ? (
                     <span className={styles.fileIcon}>
-                        <i className={`bi ${getFileIcon(file)}`} aria-hidden="true"></i>
+                        <i aria-hidden="true" className="bi bi-file-text"></i>
+                    </span>
+                ) : (
+                    <div className={styles.textPreview}>
+                        <span className={styles.fileIcon}>
+                            <i aria-hidden="true" className="bi bi-file-text"></i>
+                        </span>
+                        {preview.content && <div className={styles.textContent}>{preview.content}</div>}
+                    </div>
+                );
+            }
+
+            case "video": {
+                return preview.url ? (
+                    <div className={styles.videoPreview}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt={`${file.name} thumbnail`} className={styles.previewImage} src={preview.url} />
+                        <div className={styles.playOverlay}>
+                            <i aria-hidden="true" className="bi bi-play-fill"></i>
+                        </div>
+                    </div>
+                ) : (
+                    <span className={styles.fileIcon}>
+                        <i aria-hidden="true" className="bi bi-file-earmark-play"></i>
                     </span>
                 );
+            }
+
+            default: {
+                return (
+                    <span className={styles.fileIcon}>
+                        <i aria-hidden="true" className={`bi ${getFileIcon(file)}`}></i>
+                    </span>
+                );
+            }
         }
     };
 
