@@ -9,7 +9,7 @@ export default function ThemeSelector() {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("theme");
+        const saved = localStorage.getItem("waifuvault-theme");
         if (saved && themes.some(theme => theme.id === saved)) {
             setCurrentTheme(saved);
             document.documentElement.dataset.theme = saved;
@@ -19,7 +19,7 @@ export default function ThemeSelector() {
     const handleThemeChange = (themeId: string) => {
         setCurrentTheme(themeId);
         document.documentElement.dataset.theme = themeId;
-        localStorage.setItem("theme", themeId);
+        localStorage.setItem("waifuvault-theme", themeId);
         setIsOpen(false);
     };
 

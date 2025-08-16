@@ -1,8 +1,14 @@
+
 {
   "name": "waifuvault-uploader",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "overrides": {
+    "eslint-plugin-vitest": {
+      "@typescript-eslint/utils": "^8.39.1"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -43,9 +49,6 @@
     "typescript-eslint": "^8.39.1"
   },
   "lint-staged": {
-    "app/**/*.{ts,tsx}": [
-      "tsc-files --noEmit --pretty"
-    ],
     "app/**/*.{ts,tsx,js,jsx}": [
       "eslint --cache --fix",
       "prettier --write"

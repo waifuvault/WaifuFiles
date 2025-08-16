@@ -69,6 +69,28 @@
     --backdrop-blur: none;
 }
 
+/* Orange Terminal theme */
+[data-theme="orangeterminal"] {
+    --bg-primary: #000000;
+    --bg-secondary: rgba(255, 165, 0, 0.05); /* light orange tint */
+    --bg-tertiary: rgba(255, 165, 0, 0.1); /* stronger orange tint */
+    --text-primary: #ffa500; /* bright orange */
+    --text-secondary: #cc8400; /* darker burnt orange */
+    --text-accent: #ffb733; /* softer amber accent */
+    --border-primary: rgba(255, 165, 0, 0.5);
+    --border-secondary: rgba(255, 165, 0, 0.2);
+    --gradient-primary: linear-gradient(135deg, #ffa500 0%, #cc8400 100%);
+    --gradient-bg:
+        radial-gradient(circle at 20% 80%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(204, 132, 0, 0.05) 0%, transparent 50%);
+    --success-color: #ffa500;
+    --error-color: #ff4444;
+    --warning-color: #ffff00;
+    --shadow-primary: 0 8px 32px rgba(255, 165, 0, 0.2);
+    --shadow-secondary: 0 4px 16px rgba(255, 165, 0, 0.3);
+    --backdrop-blur: none;
+}
+
 /* Minimal theme */
 [data-theme="minimal"] {
     --bg-primary: #ffffff;
@@ -136,7 +158,21 @@ body {
     font-family: "Courier New", "Monaco", "Menlo", monospace;
 }
 
+[data-theme="orangeterminal"] body {
+    font-family: "Courier New", "Monaco", "Menlo", monospace;
+}
+
 [data-theme="terminal"] .title {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: "Courier New", "Monaco", "Menlo", monospace;
+    text-shadow: 0 0 10px var(--text-primary);
+    animation: terminalBlink 1s infinite;
+}
+
+[data-theme="orangeterminal"] .title {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -162,6 +198,11 @@ body {
     animation: terminalScan 2s linear infinite;
 }
 
+[data-theme="orangeterminal"] .container::before {
+    background: var(--gradient-bg);
+    animation: terminalScan 2s linear infinite;
+}
+
 @keyframes terminalScan {
     0% {
         background-position: 0% 0%;
@@ -173,6 +214,12 @@ body {
 
 /* Terminal cursor effect */
 [data-theme="terminal"] .subtitle::after {
+    content: "█";
+    animation: terminalCursor 1s infinite;
+    margin-left: 2px;
+}
+
+[data-theme="orangeterminal"] .subtitle::after {
     content: "█";
     animation: terminalCursor 1s infinite;
     margin-left: 2px;
