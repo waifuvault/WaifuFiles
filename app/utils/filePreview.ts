@@ -1,8 +1,8 @@
 export interface FilePreview {
-    type: "image" | "video" | "audio" | "pdf" | "text" | "unknown";
-    url?: string;
     content?: string;
     error?: string;
+    type: "audio" | "image" | "pdf" | "text" | "unknown" | "video";
+    url?: string;
 }
 
 export const getFileType = (file: File): FilePreview["type"] => {
@@ -24,7 +24,7 @@ export const getFileType = (file: File): FilePreview["type"] => {
         mimeType.startsWith("text/") ||
         mimeType === "application/json" ||
         mimeType === "application/javascript" ||
-        file.name.match(/\.(txt|md|js|ts|jsx|tsx|css|html|xml|yml|yaml|json|csv)$/i)
+        /\.(txt|md|js|ts|jsx|tsx|css|html|xml|yml|yaml|json|csv)$/i.test(file.name)
     ) {
         return "text";
     }
@@ -43,16 +43,16 @@ export const generateImagePreview = (file: File): Promise<FilePreview> => {
         }
 
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.addEventListener("load", e => {
             resolve({
                 type: "image",
                 url: e.target?.result as string,
             });
-        };
+        });
         reader.onerror = () => {
             resolve({
-                type: "image",
                 error: "Failed to load image",
+                type: "image",
             });
         };
         reader.readAsDataURL(file);
@@ -68,11 +68,11 @@ export const generateVideoPreview = (file: File): Promise<FilePreview> => {
         video.preload = "metadata";
         video.muted = true;
 
-        video.onloadedmetadata = () => {
+        video.addEventListener("loadedmetadata", () => {
             video.currentTime = video.duration * 0.1;
-        };
+        });
 
-        video.onseeked = () => {
+        video.addEventListener("seeked", () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
@@ -86,18 +86,18 @@ export const generateVideoPreview = (file: File): Promise<FilePreview> => {
                 });
             } else {
                 resolve({
-                    type: "video",
                     error: "Failed to generate thumbnail",
+                    type: "video",
                 });
             }
 
             URL.revokeObjectURL(video.src);
-        };
+        });
 
         video.onerror = () => {
             resolve({
-                type: "video",
                 error: "Failed to load video",
+                type: "video",
             });
             URL.revokeObjectURL(video.src);
         };
@@ -110,26 +110,26 @@ export const generateTextPreview = (file: File): Promise<FilePreview> => {
     return new Promise(resolve => {
         if (file.size > 1024 * 100) {
             resolve({
-                type: "text",
                 content: "File too large for preview",
+                type: "text",
             });
             return;
         }
 
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.addEventListener("load", e => {
             const content = e.target?.result as string;
-            const preview = content.length > 500 ? content.substring(0, 500) + "..." : content;
+            const preview = content.length > 500 ? `${content.slice(0, 500)}...` : content;
 
             resolve({
-                type: "text",
                 content: preview,
+                type: "text",
             });
-        };
+        });
         reader.onerror = () => {
             resolve({
-                type: "text",
                 error: "Failed to read file",
+                type: "text",
             });
         };
         reader.readAsText(file);
@@ -141,31 +141,37 @@ export const generateFilePreview = async (file: File): Promise<FilePreview> => {
 
     try {
         switch (fileType) {
-            case "image":
-                return await generateImagePreview(file);
-            case "video":
-                return await generateVideoPreview(file);
-            case "text":
-                return await generateTextPreview(file);
-            case "audio":
+            case "audio": {
                 return {
                     type: "audio",
                     url: URL.createObjectURL(file),
                 };
-            case "pdf":
+            }
+            case "image": {
+                return await generateImagePreview(file);
+            }
+            case "pdf": {
                 return {
                     type: "pdf",
                     url: URL.createObjectURL(file),
                 };
-            default:
+            }
+            case "text": {
+                return await generateTextPreview(file);
+            }
+            case "video": {
+                return await generateVideoPreview(file);
+            }
+            default: {
                 return {
                     type: "unknown",
                 };
+            }
         }
     } catch {
         return {
-            type: fileType,
             error: "Failed to generate preview",
+            type: fileType,
         };
     }
 };
@@ -209,73 +215,99 @@ export const getFileIcon = (file: File): string => {
 
     switch (extension) {
         // Archives
-        case "zip":
-        case "rar":
         case "7z":
+        case "rar":
+        case "zip": {
             return "bi-file-zip";
+        }
 
-        // Office documents
-        case "docx":
-            return "bi-filetype-docx";
-        case "doc":
-            return "bi-filetype-doc";
-        case "xlsx":
-            return "bi-filetype-xlsx";
-        case "xls":
-            return "bi-filetype-xls";
-        case "pptx":
-            return "bi-filetype-pptx";
-        case "ppt":
-            return "bi-filetype-ppt";
-
-        // Code files
-        case "js":
-            return "bi-filetype-js";
-        case "ts":
-            return "bi-filetype-ts";
-        case "jsx":
-        case "tsx":
-            return "bi-file-code";
-        case "sql":
-            return "bi-filetype-sql";
-        case "css":
-            return "bi-filetype-css";
-        case "html":
-            return "bi-filetype-html";
-        case "xml":
-            return "bi-filetype-xml";
-        case "java":
-            return "bi-filetype-java";
-        case "yaml":
-        case "yml":
-            return "bi-filetype-yml";
-        case "py":
-            return "bi-filetype-py";
-        case "sh":
-            return "bi-filetype-sh";
-
-        // Data files
-        case "json":
-            return "bi-filetype-json";
-        case "csv":
-            return "bi-filetype-csv";
-        case "md":
-            return "bi-filetype-md";
-        case "txt":
-            return "bi-filetype-txt";
-
-        // Executables
-        case "exe":
-            return "bi-filetype-exe";
-        case "app":
+        case "app": {
             return "bi-terminal";
-
+        }
+        case "css": {
+            return "bi-filetype-css";
+        }
+        case "csv": {
+            return "bi-filetype-csv";
+        }
         // Disk images
         case "dmg":
-        case "iso":
+        case "iso": {
             return "bi-disc";
+        }
+        case "doc": {
+            return "bi-filetype-doc";
+        }
 
-        default:
+        // Office documents
+        case "docx": {
+            return "bi-filetype-docx";
+        }
+        // Executables
+        case "exe": {
+            return "bi-filetype-exe";
+        }
+        case "html": {
+            return "bi-filetype-html";
+        }
+        case "java": {
+            return "bi-filetype-java";
+        }
+        // Code files
+        case "js": {
+            return "bi-filetype-js";
+        }
+        // Data files
+        case "json": {
+            return "bi-filetype-json";
+        }
+        case "jsx":
+        case "tsx": {
+            return "bi-file-code";
+        }
+        case "md": {
+            return "bi-filetype-md";
+        }
+        case "ppt": {
+            return "bi-filetype-ppt";
+        }
+        case "pptx": {
+            return "bi-filetype-pptx";
+        }
+        case "py": {
+            return "bi-filetype-py";
+        }
+        case "sh": {
+            return "bi-filetype-sh";
+        }
+
+        case "sql": {
+            return "bi-filetype-sql";
+        }
+        case "ts": {
+            return "bi-filetype-ts";
+        }
+        case "txt": {
+            return "bi-filetype-txt";
+        }
+        case "xls": {
+            return "bi-filetype-xls";
+        }
+
+        case "xlsx": {
+            return "bi-filetype-xlsx";
+        }
+        case "xml": {
+            return "bi-filetype-xml";
+        }
+
+        case "yaml":
+        case "yml": {
+            return "bi-filetype-yml";
+        }
+
+        default: {
             return "bi-file-earmark";
+        }
     }
 };

@@ -4,17 +4,17 @@ import styles from "../page.module.css";
 import { validateExpires } from "../utils/upload";
 
 interface OptionsPanelProps {
-    options: Partial<FileUpload>;
     onOptionsChange: (options: Partial<FileUpload>) => void;
+    options: Partial<FileUpload>;
 }
 
-export default function OptionsPanel({ options, onOptionsChange }: OptionsPanelProps) {
+export default function OptionsPanel({ onOptionsChange, options }: OptionsPanelProps) {
     const updateOption = <K extends keyof FileUpload>(key: K, value: FileUpload[K]) => {
         onOptionsChange({ ...options, [key]: value });
     };
 
     const handleExpiresChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+        const { value } = e.target;
         updateOption("expires", value);
         if (value === "" || validateExpires(value)) {
             e.target.setCustomValidity("");
@@ -30,9 +30,11 @@ export default function OptionsPanel({ options, onOptionsChange }: OptionsPanelP
             <div className={styles.optionRow}>
                 <label>
                     <input
-                        type="checkbox"
                         checked={options.hideFilename ?? false}
-                        onChange={e => updateOption("hideFilename", e.target.checked)}
+                        onChange={e => {
+                            updateOption("hideFilename", e.target.checked);
+                        }}
+                        type="checkbox"
                     />
                     Hide filename in URL
                 </label>
@@ -41,9 +43,11 @@ export default function OptionsPanel({ options, onOptionsChange }: OptionsPanelP
             <div className={styles.optionRow}>
                 <label>
                     <input
-                        type="checkbox"
                         checked={options.oneTimeDownload ?? false}
-                        onChange={e => updateOption("oneTimeDownload", e.target.checked)}
+                        onChange={e => {
+                            updateOption("oneTimeDownload", e.target.checked);
+                        }}
+                        type="checkbox"
                     />
                     One-time download (delete after first access)
                 </label>
@@ -52,24 +56,26 @@ export default function OptionsPanel({ options, onOptionsChange }: OptionsPanelP
             <div className={styles.optionRow}>
                 <label>Password (encrypts file):</label>
                 <input
-                    type="password"
-                    placeholder="Optional password"
-                    value={options.password ?? ""}
-                    onChange={e => updateOption("password", e.target.value)}
                     className={styles.optionInput}
+                    onChange={e => {
+                        updateOption("password", e.target.value);
+                    }}
+                    placeholder="Optional password"
+                    type="password"
+                    value={options.password ?? ""}
                 />
             </div>
 
             <div className={styles.optionRow}>
                 <label>Expires (e.g., 1h, 30m, 2d):</label>
                 <input
-                    type="text"
-                    placeholder="Optional expiry (1h, 30m, 2d)"
-                    value={options.expires ?? ""}
-                    onChange={handleExpiresChange}
                     className={styles.optionInput}
+                    onChange={handleExpiresChange}
                     pattern="^$|^\d+[mhd]$"
+                    placeholder="Optional expiry (1h, 30m, 2d)"
                     title="Format: number + m/h/d (e.g., 1h, 30m, 2d)"
+                    type="text"
+                    value={options.expires ?? ""}
                 />
             </div>
 

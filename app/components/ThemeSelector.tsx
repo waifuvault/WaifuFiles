@@ -12,13 +12,13 @@ export default function ThemeSelector() {
         const saved = localStorage.getItem("theme");
         if (saved && themes.some(theme => theme.id === saved)) {
             setCurrentTheme(saved);
-            document.documentElement.setAttribute("data-theme", saved);
+            document.documentElement.dataset.theme = saved;
         }
     }, []);
 
     const handleThemeChange = (themeId: string) => {
         setCurrentTheme(themeId);
-        document.documentElement.setAttribute("data-theme", themeId);
+        document.documentElement.dataset.theme = themeId;
         localStorage.setItem("theme", themeId);
         setIsOpen(false);
     };
@@ -28,16 +28,18 @@ export default function ThemeSelector() {
     return (
         <div className={styles.themeSelector}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={styles.themeButton}
-                aria-label="Theme selector"
                 aria-expanded={isOpen}
+                aria-label="Theme selector"
+                className={styles.themeButton}
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                }}
             >
-                <i className={`${currentThemeData.icon} ${styles.themeIcon}`} aria-hidden="true"></i>
+                <i aria-hidden="true" className={`${currentThemeData.icon} ${styles.themeIcon}`}></i>
                 <span className={styles.themeText}>{currentThemeData.name}</span>
                 <i
-                    className={`bi-chevron-down ${styles.chevron} ${isOpen ? styles.chevronUp : styles.chevronDown}`}
                     aria-hidden="true"
+                    className={`bi-chevron-down ${styles.chevron} ${isOpen ? styles.chevronUp : styles.chevronDown}`}
                 ></i>
             </button>
 
@@ -46,22 +48,26 @@ export default function ThemeSelector() {
                     <div className={styles.popupHeader}>
                         <h3>Choose Theme</h3>
                         <button
-                            onClick={() => setIsOpen(false)}
-                            className={styles.closeButton}
                             aria-label="Close theme selector"
+                            className={styles.closeButton}
+                            onClick={() => {
+                                setIsOpen(false);
+                            }}
                         >
-                            <i className="bi-x" aria-hidden="true"></i>
+                            <i aria-hidden="true" className="bi-x"></i>
                         </button>
                     </div>
 
                     <div className={styles.themeGrid}>
                         {themes.map(theme => (
                             <button
-                                key={theme.id}
-                                onClick={() => handleThemeChange(theme.id)}
                                 className={`${styles.themeOption} ${
                                     currentTheme === theme.id ? styles.themeOptionActive : ""
                                 }`}
+                                key={theme.id}
+                                onClick={() => {
+                                    handleThemeChange(theme.id);
+                                }}
                             >
                                 <div className={styles.themePreview}>
                                     <div className={`${styles.themePreviewBg} ${styles[`preview${theme.id}`]}`}>
@@ -75,7 +81,7 @@ export default function ThemeSelector() {
                                         </div>
                                     </div>
                                     <div className={styles.themePreviewIcon}>
-                                        <i className={theme.icon} aria-hidden="true"></i>
+                                        <i aria-hidden="true" className={theme.icon}></i>
                                     </div>
                                 </div>
 
@@ -86,7 +92,7 @@ export default function ThemeSelector() {
 
                                 {currentTheme === theme.id && (
                                     <div className={styles.activeIndicator}>
-                                        <i className="bi-check" aria-hidden="true"></i>
+                                        <i aria-hidden="true" className="bi-check"></i>
                                     </div>
                                 )}
                             </button>

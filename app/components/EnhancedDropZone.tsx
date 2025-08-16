@@ -5,22 +5,22 @@ import FilePreview from "./FilePreview";
 
 interface EnhancedDropZoneProps {
     isDragging: boolean;
+    maxFileSize: number;
     onDragEnter: (e: DragEvent) => void;
     onDragLeave: (e: DragEvent) => void;
     onDragOver: (e: DragEvent) => void;
     onDrop: (e: DragEvent) => void;
     onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    maxFileSize: number;
 }
 
 export default function EnhancedDropZone({
     isDragging,
+    maxFileSize,
     onDragEnter,
     onDragLeave,
     onDragOver,
     onDrop,
     onFileSelect,
-    maxFileSize,
 }: EnhancedDropZoneProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [draggedFiles, setDraggedFiles] = useState<File[]>([]);
@@ -33,7 +33,7 @@ export default function EnhancedDropZone({
     const handleDragEnter = (e: DragEvent) => {
         onDragEnter(e);
 
-        const files = Array.from(e.dataTransfer.files ?? []);
+        const files = [...(e.dataTransfer.files ?? [])];
         if (files.length > 0) {
             setDraggedFiles(files);
             setShowPreviews(true);
@@ -61,13 +61,13 @@ export default function EnhancedDropZone({
     return (
         <div
             className={`${styles.dropzone} ${isDragging ? styles.dragging : ""}`}
+            onClick={handleClick}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={onDragOver}
             onDrop={handleDrop}
-            onClick={handleClick}
         >
-            <input ref={fileInputRef} type="file" onChange={onFileSelect} multiple style={{ display: "none" }} />
+            <input multiple onChange={onFileSelect} ref={fileInputRef} style={{ display: "none" }} type="file" />
 
             {showPreviews && draggedFiles.length > 0 ? (
                 <div className={styles.dragPreviewContainer}>
@@ -76,10 +76,10 @@ export default function EnhancedDropZone({
                     </h3>
                     <div className={styles.dragPreviews}>
                         {draggedFiles.map((file, index) => (
-                            <div key={index} className={styles.dragPreviewItem}>
+                            <div className={styles.dragPreviewItem} key={index}>
                                 <FilePreview file={file} size="small" />
                                 <span className={styles.dragPreviewName}>
-                                    {file.name.length > 20 ? file.name.substring(0, 17) + "..." : file.name}
+                                    {file.name.length > 20 ? `${file.name.slice(0, 17)}...` : file.name}
                                 </span>
                             </div>
                         ))}
@@ -89,7 +89,7 @@ export default function EnhancedDropZone({
             ) : (
                 <div className={styles.dropzoneContent}>
                     <div className={styles.uploadIcon}>
-                        <i className="bi bi-cloud-upload" aria-hidden="true"></i>
+                        <i aria-hidden="true" className="bi bi-cloud-upload"></i>
                     </div>
                     <p>Drop files here or click to select</p>
                     <span className={styles.hint}>

@@ -12,7 +12,7 @@ import ThemeSelector from "@/app/components/ThemeSelector";
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadItem[]>([]);
-    const [maxFileSize, setMaxFileSize] = useState<number>(1048576000); // Default 1GB
+    const [maxFileSize, setMaxFileSize] = useState<number>(1_048_576_000); // Default 1GB
     const [bannedTypes, setBannedTypes] = useState<string[]>([]);
 
     useEffect(() => {
@@ -37,29 +37,29 @@ export default function Home(): ReactElement {
     }, []);
 
     const addFiles = (files: FileList): void => {
-        const newUploads: UploadItem[] = Array.from(files).map(file => {
+        const newUploads: UploadItem[] = [...files].map(file => {
             if (file.size > maxFileSize) {
                 return {
-                    file,
-                    status: "error" as const,
                     error: `File too large (${formatFileSize(file.size)}). Max size: ${formatFileSize(maxFileSize)}`,
+                    file,
                     options: {},
+                    status: "error" as const,
                 };
             }
 
             if (bannedTypes.length > 0 && bannedTypes.includes(file.type)) {
                 return {
-                    file,
-                    status: "error" as const,
                     error: `File type not allowed: ${file.type}`,
+                    file,
                     options: {},
+                    status: "error" as const,
                 };
             }
 
             return {
                 file,
-                status: "pending" as const,
                 options: {},
+                status: "pending" as const,
             };
         });
         setUploads(prev => [...prev, ...newUploads]);
@@ -72,7 +72,7 @@ export default function Home(): ReactElement {
         }
 
         setUploads(prev =>
-            prev.map((item, index) => (index === uploadIndex ? { ...item, status: "uploading", progress: 0 } : item)),
+            prev.map((item, index) => (index === uploadIndex ? { ...item, progress: 0, status: "uploading" } : item)),
         );
 
         try {
@@ -96,14 +96,14 @@ export default function Home(): ReactElement {
             xhr.upload.addEventListener("loadend", () => {
                 setUploads(prev =>
                     prev.map((item, index) =>
-                        index === uploadIndex ? { ...item, status: "processing", progress: 100 } : item,
+                        index === uploadIndex ? { ...item, progress: 100, status: "processing" } : item,
                     ),
                 );
             });
 
             // Create a promise to handle the XMLHttpRequest - can't use fetch
             const uploadPromise = new Promise<WaifuFile>((resolve, reject) => {
-                xhr.onload = () => {
+                xhr.addEventListener("load", () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
                             const response = JSON.parse(xhr.responseText);
@@ -123,7 +123,7 @@ export default function Home(): ReactElement {
                             reject(new Error(`Upload failed with status ${xhr.status}`));
                         }
                     }
-                };
+                });
 
                 xhr.onerror = () => {
                     reject(new Error("Network error occurred"));
@@ -137,14 +137,14 @@ export default function Home(): ReactElement {
 
             setUploads(prev =>
                 prev.map((item, index) =>
-                    index === uploadIndex ? { ...item, status: "completed", result, progress: 100 } : item,
+                    index === uploadIndex ? { ...item, progress: 100, result, status: "completed" } : item,
                 ),
             );
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Upload failed";
             setUploads(prev =>
                 prev.map((item, index) =>
-                    index === uploadIndex ? { ...item, status: "error", error: errorMessage } : item,
+                    index === uploadIndex ? { ...item, error: errorMessage, status: "error" } : item,
                 ),
             );
         }
@@ -153,7 +153,7 @@ export default function Home(): ReactElement {
     const resetToPending = (uploadIndex: number) => {
         setUploads(prev =>
             prev.map((item, index) =>
-                index === uploadIndex ? { ...item, status: "pending", error: undefined } : item,
+                index === uploadIndex ? { ...item, error: undefined, status: "pending" } : item,
             ),
         );
     };
@@ -174,7 +174,7 @@ export default function Home(): ReactElement {
 
     const uploadAll = async () => {
         const pendingUploads = uploads
-            .map((upload, index) => ({ upload, index }))
+            .map((upload, index) => ({ index, upload }))
             .filter(({ upload }) => upload.status === "pending");
 
         for (const { index } of pendingUploads) {
@@ -205,14 +205,14 @@ export default function Home(): ReactElement {
         e.preventDefault();
         setIsDragging(false);
 
-        const files = e.dataTransfer.files;
+        const { files } = e.dataTransfer;
         if (files.length > 0) {
             addFiles(files);
         }
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
+        const { files } = e.target;
         if (files && files.length > 0) {
             addFiles(files);
         }
@@ -236,7 +236,7 @@ export default function Home(): ReactElement {
                 </div>
 
                 <div className={styles.logo}>
-                    <a href={"https://waifuvault.moe"} target="_blank" rel="noopener noreferrer">
+                    <a href={"https://waifuvault.moe"} rel="noopener noreferrer" target="_blank">
                         <div className={styles.logoImage}></div>
                     </a>
                 </div>
@@ -246,23 +246,23 @@ export default function Home(): ReactElement {
 
             <EnhancedDropZone
                 isDragging={isDragging}
+                maxFileSize={maxFileSize}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onFileSelect={handleFileSelect}
-                maxFileSize={maxFileSize}
             />
 
             <UploadQueue
-                uploads={uploads}
-                onUploadAll={uploadAll}
                 onClearAll={clearUploads}
-                onUpload={uploadFile}
                 onRemove={removeUpload}
                 onResetToPending={resetToPending}
                 onToggleOptions={toggleOptions}
                 onUpdateOptions={updateUploadOptions}
+                onUpload={uploadFile}
+                onUploadAll={uploadAll}
+                uploads={uploads}
             />
         </div>
     );
