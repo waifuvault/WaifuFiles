@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "overrides": {
+    "eslint-plugin-vitest": {
+      "@typescript-eslint/utils": "^8.39.1"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,7 +16,8 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier ./app --check",
     "prettier:fix": "prettier ./app --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
@@ -44,7 +50,7 @@
   },
   "lint-staged": {
     "app/**/*.{ts,tsx}": [
-      "tsc-files --noEmit --pretty"
+      "npm run type-check"
     ],
     "app/**/*.{ts,tsx,js,jsx}": [
       "eslint --cache --fix",
