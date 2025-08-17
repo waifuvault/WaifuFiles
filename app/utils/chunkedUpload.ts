@@ -5,9 +5,10 @@ interface ChunkUploadOptions extends Partial<FileUpload> {
 }
 
 export class ChunkedUploader {
-    private static readonly CHUNK_SIZE = parseInt(process.env.NEXT_PUBLIC_CHUNK_SIZE ?? (5 * 1024 * 1024).toString()); // Default 5MB chunks if not set
-    private static readonly CHUNK_TIMEOUT = 60000; // 1 minute per chunk
+    private static readonly CHUNK_SIZE = parseInt(process.env.NEXT_PUBLIC_CHUNK_SIZE ?? (5 * 1024 * 1024).toString());
+    private static readonly CHUNK_TIMEOUT = 60000;
     private static readonly MAX_RETRIES = 3;
+    private static readonly MAX_CONCURRENT_CHUNKS = 3;
     private static activeUploads = new Map<string, AbortController>();
 
     static {
@@ -28,19 +29,8 @@ export class ChunkedUploader {
         this.activeUploads.set(actualUploadId, mainController);
 
         try {
-            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-                if (mainController.signal.aborted) {
-                    throw new Error("Upload cancelled");
-                }
-
-                const start = chunkIndex * this.CHUNK_SIZE;
-                const end = Math.min(start + this.CHUNK_SIZE, file.size);
-                const chunk = file.slice(start, end);
-
-                await this.uploadChunkWithRetry(chunk, chunkIndex, totalChunks, actualUploadId, mainController.signal);
-                const progress = Math.round(((chunkIndex + 1) / totalChunks) * 90);
-                onProgress(progress);
-            }
+            // Upload chunks with limited concurrency
+            await this.uploadChunksConcurrently(file, totalChunks, actualUploadId, mainController.signal, onProgress);
 
             if (mainController.signal.aborted) {
                 throw new Error("Upload cancelled");
@@ -61,10 +51,63 @@ export class ChunkedUploader {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ uploadId: actualUploadId }),
                 });
-            } catch (error) {
-                console.error(error);
+            } catch (cleanupError) {
+                console.error("Cleanup failed:", cleanupError);
             }
             throw error;
+        }
+    }
+
+    private static async uploadChunksConcurrently(
+        file: File,
+        totalChunks: number,
+        uploadId: string,
+        signal: AbortSignal,
+        onProgress: (progress: number) => void,
+    ): Promise<void> {
+        const chunkProgress = new Array(totalChunks).fill(0);
+        let nextChunkIndex = 0;
+        const activePromises = new Set<Promise<void>>();
+
+        const updateProgress = () => {
+            const completedChunks = chunkProgress.reduce((sum, progress) => sum + progress, 0);
+            const progress = Math.round((completedChunks / totalChunks) * 90);
+            onProgress(progress);
+        };
+
+        const uploadNextChunk = async (): Promise<void> => {
+            if (signal.aborted || nextChunkIndex >= totalChunks) {
+                return;
+            }
+
+            const chunkIndex = nextChunkIndex++;
+            const start = chunkIndex * this.CHUNK_SIZE;
+            const end = Math.min(start + this.CHUNK_SIZE, file.size);
+            const chunk = file.slice(start, end);
+
+            await this.uploadChunkWithRetry(chunk, chunkIndex, totalChunks, uploadId, signal);
+            chunkProgress[chunkIndex] = 1;
+            updateProgress();
+
+            if (nextChunkIndex < totalChunks && !signal.aborted) {
+                const nextPromise = uploadNextChunk();
+                activePromises.add(nextPromise);
+                nextPromise.finally(() => activePromises.delete(nextPromise));
+            }
+        };
+
+        for (let i = 0; i < Math.min(this.MAX_CONCURRENT_CHUNKS, totalChunks); i++) {
+            const promise = uploadNextChunk();
+            activePromises.add(promise);
+            promise.finally(() => activePromises.delete(promise));
+        }
+
+        while (activePromises.size > 0) {
+            await Promise.race(activePromises);
+        }
+
+        if (signal.aborted) {
+            throw new Error("Upload cancelled");
         }
     }
 
