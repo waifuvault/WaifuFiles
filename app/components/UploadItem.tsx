@@ -84,7 +84,7 @@ export default function UploadItem({
                         </>
                     )}
 
-                    {upload.status === "uploading" && (
+                    {(upload.status === "uploading" || upload.status === "processing") && (
                         <div className={styles.uploading}>
                             <div className={styles.progressContainer}>
                                 <div className={styles.progressBar}>
@@ -93,15 +93,10 @@ export default function UploadItem({
                                         style={{ width: `${upload.progress ?? 0}%` }}
                                     ></div>
                                 </div>
-                                <span className={styles.progressText}>{upload.progress ?? 0}%</span>
+                                <span className={styles.progressText}>
+                                    {upload.status === "processing" ? "Processing..." : `${upload.progress ?? 0}%`}
+                                </span>
                             </div>
-                        </div>
-                    )}
-
-                    {upload.status === "processing" && (
-                        <div className={styles.processing}>
-                            <div className={styles.spinner}></div>
-                            <span>Processing...</span>
                         </div>
                     )}
 
@@ -144,11 +139,18 @@ export default function UploadItem({
                 </div>
 
                 <button
-                    aria-label="Remove"
+                    aria-label={
+                        upload.status === "uploading" || upload.status === "processing" ? "Cancel Upload" : "Remove"
+                    }
                     className={styles.removeBtn}
                     onClick={() => {
                         onRemove(index);
                     }}
+                    title={
+                        upload.status === "uploading" || upload.status === "processing"
+                            ? "Cancel upload"
+                            : "Remove file"
+                    }
                 >
                     <i aria-hidden="true" className="bi bi-x-lg"></i>
                 </button>

@@ -2,12 +2,13 @@
 
 import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { FileUpload, WaifuFile } from "waifuvault-node-api";
+import { FileUpload } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize } from "./utils/upload";
 import UploadQueue from "./components/UploadQueue";
 import EnhancedDropZone from "@/app/components/EnhancedDropZone";
 import ThemeSelector from "@/app/components/ThemeSelector";
+import { ChunkedUploader } from "@/app/utils/chunkedUpload";
 
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
@@ -67,84 +68,51 @@ export default function Home(): ReactElement {
 
     const uploadFile = async (uploadIndex: number) => {
         const upload = uploads[uploadIndex];
-        if (!upload || upload.status !== "pending") {
+        if (!upload || (upload.status !== "pending" && upload.status !== "error")) {
             return;
         }
 
+        const uploadId = ChunkedUploader.getUploadId(upload.file, { ...upload.options, filename: upload.file.name });
+
         setUploads(prev =>
-            prev.map((item, index) => (index === uploadIndex ? { ...item, progress: 0, status: "uploading" } : item)),
+            prev.map((item, index) =>
+                index === uploadIndex
+                    ? { ...item, progress: 0, status: "uploading", uploadId, error: undefined }
+                    : item,
+            ),
         );
 
         try {
-            const formData = new FormData();
-            formData.append("file", upload.file);
-            formData.append("options", JSON.stringify(upload.options));
-
-            const xhr = new XMLHttpRequest();
-
-            xhr.upload.addEventListener("progress", event => {
-                if (event.lengthComputable) {
-                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+            const result = await ChunkedUploader.uploadFile(
+                upload.file,
+                { ...upload.options, filename: upload.file.name },
+                (progress: number) => {
+                    setUploads(prev =>
+                        prev.map((item, index) => (index === uploadIndex ? { ...item, progress } : item)),
+                    );
+                },
+                () => {
                     setUploads(prev =>
                         prev.map((item, index) =>
-                            index === uploadIndex ? { ...item, progress: percentComplete } : item,
+                            index === uploadIndex ? { ...item, progress: 100, status: "processing" } : item,
                         ),
                     );
-                }
-            });
-
-            xhr.upload.addEventListener("loadend", () => {
-                setUploads(prev =>
-                    prev.map((item, index) =>
-                        index === uploadIndex ? { ...item, progress: 100, status: "processing" } : item,
-                    ),
-                );
-            });
-
-            // Create a promise to handle the XMLHttpRequest - can't use fetch
-            const uploadPromise = new Promise<WaifuFile>((resolve, reject) => {
-                xhr.addEventListener("load", () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            resolve(response);
-                        } catch {
-                            reject(new Error("Invalid JSON response"));
-                        }
-                    } else {
-                        try {
-                            const errorData = JSON.parse(xhr.responseText);
-                            if (errorData.name && errorData.status) {
-                                reject(new Error(`${errorData.name}: ${errorData.error}`));
-                            } else {
-                                reject(new Error(errorData.error ?? "Upload failed"));
-                            }
-                        } catch {
-                            reject(new Error(`Upload failed with status ${xhr.status}`));
-                        }
-                    }
-                });
-
-                xhr.onerror = () => {
-                    reject(new Error("Network error occurred"));
-                };
-
-                xhr.open("POST", "/api/upload");
-                xhr.send(formData);
-            });
-
-            const result = await uploadPromise;
+                },
+                uploadId,
+            );
 
             setUploads(prev =>
                 prev.map((item, index) =>
-                    index === uploadIndex ? { ...item, progress: 100, result, status: "completed" } : item,
+                    index === uploadIndex ? { ...item, result, status: "completed", uploadId: undefined } : item,
                 ),
             );
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Upload failed";
             setUploads(prev =>
                 prev.map((item, index) =>
-                    index === uploadIndex ? { ...item, error: errorMessage, status: "error" } : item,
+                    index === uploadIndex
+                        ? { ...item, error: errorMessage, status: "error", uploadId: undefined }
+                        : item,
                 ),
             );
         }
@@ -223,6 +191,13 @@ export default function Home(): ReactElement {
     };
 
     const removeUpload = (index: number) => {
+        const upload = uploads[index];
+
+        if (upload && upload.uploadId && (upload.status === "uploading" || upload.status === "processing")) {
+            console.log("Cancelling upload with ID:", upload.uploadId);
+            ChunkedUploader.cancelUpload(upload.uploadId);
+        }
+
         setUploads(prev => prev.filter((_, i) => i !== index));
     };
 

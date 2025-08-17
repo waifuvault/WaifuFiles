@@ -13,4 +13,5 @@ export interface UploadItem {
     result?: WaifuFile;
     showOptions?: boolean;
     status: "completed" | "error" | "pending" | "processing" | "uploading";
+    uploadId?: string;
 }
