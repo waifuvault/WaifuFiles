@@ -1,5 +1,6 @@
 import Waifuvault, { FileUpload, WaifuError } from "waifuvault-node-api";
 import { NextRequest, NextResponse } from "next/server";
+import { log } from "@/app/utils/server";
 
 export async function POST(req: NextRequest) {
     const bucketToken = process.env.WAIFUVAULT_BUCKET_TOKEN;
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(resp);
     } catch (error) {
-        console.error("Upload error:", error);
+        log.debugError("Upload error:", error);
 
         if (error && typeof error === "object" && "name" in error && "message" in error && "status" in error) {
             const waifuError = error as WaifuError;

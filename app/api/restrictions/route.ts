@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { log } from "@/app/utils/server";
 
 interface Restriction {
     type: string;
@@ -21,7 +22,7 @@ export async function GET() {
             },
         });
     } catch (error) {
-        console.error("Failed to fetch restrictions:", error);
+        log.debug("Failed to fetch restrictions:", error);
 
         const defaultRestrictions: Restriction[] = [
             {
