@@ -2,22 +2,23 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "./ThemeSelector.module.css";
-import { themes } from "@/app/contexts/ThemeContext";
+import { localStoreThemeKey, useTheme } from "@/app/contexts/ThemeContext";
+import { ThemeType } from "@/app/constants/theme";
 
 export default function ThemeSelector() {
-    const [currentTheme, setCurrentTheme] = useState<string>("anime");
+    const { currentTheme, setTheme, themes } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("waifuvault-theme");
+        const saved = localStorage.getItem(localStoreThemeKey) as ThemeType;
         if (saved && themes.some(theme => theme.id === saved)) {
-            setCurrentTheme(saved);
+            setTheme(saved);
             document.documentElement.dataset.theme = saved;
         }
     }, []);
 
-    const handleThemeChange = (themeId: string) => {
-        setCurrentTheme(themeId);
+    const handleThemeChange = (themeId: ThemeType) => {
+        setTheme(themeId);
         document.documentElement.dataset.theme = themeId;
         localStorage.setItem("waifuvault-theme", themeId);
         setIsOpen(false);

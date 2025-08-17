@@ -1,41 +1,42 @@
 "use client";
 
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { ThemeType } from "@/app/constants/theme";
+
+export const localStoreThemeKey = "waifuvault-theme";
 
 export interface Theme {
     description: string;
-    icon: string; // Add icon property
-    id: string;
+    icon: string;
+    id: ThemeType;
     name: string;
     preview: string;
 }
-
-export type ThemeType = "anime" | "cyberpunk" | "minimal" | "terminal";
 
 export const themes: Theme[] = [
     {
         description: "Gradient theme with sparkles",
         icon: "bi-stars", // Sparkles/stars for anime theme
-        id: "anime",
+        id: ThemeType.ANIME,
         name: "Anime",
         preview: "🌸",
     },
     {
         description: "Neon lights",
         icon: "bi-cpu", // CPU/tech icon for cyberpunk
-        id: "cyberpunk",
+        id: ThemeType.CYBERPUNK,
         name: "Cyberpunk",
         preview: "🌃",
     },
     {
         description: "Green phosphor terminal style",
         icon: "bi-terminal", // Terminal icon
-        id: "terminal",
+        id: ThemeType.GREEN_PHOSPHOR,
         name: "Green Phosphor",
         preview: "💻",
     },
     {
-        id: "orangeterminal",
+        id: ThemeType.ORANGE_PHOSPHOR,
         name: "Amber Phosphor",
         description: "Amber phosphor terminal style",
         preview: "💻",
@@ -44,7 +45,7 @@ export const themes: Theme[] = [
     {
         description: "Light and simple design",
         icon: "bi-circle", // Clean circle for minimal
-        id: "minimal",
+        id: ThemeType.MINIMAL,
         name: "Minimal",
         preview: "⚪",
     },
@@ -63,19 +64,34 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-    const [currentTheme, setCurrentTheme] = useState<ThemeType>("anime");
+    const [currentTheme, setCurrentTheme] = useState<ThemeType>(ThemeType.DEFAULT);
 
     useEffect(() => {
-        // Load theme from localStorage on mount
-        const savedTheme = localStorage.getItem("waifuvault-theme") as ThemeType;
+        const savedTheme = localStorage.getItem(localStoreThemeKey) as ThemeType;
         if (savedTheme && themes.find(t => t.id === savedTheme)) {
             setCurrentTheme(savedTheme);
         }
     }, []);
 
     useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const domTheme = document.documentElement.dataset.theme as ThemeType;
+            if (domTheme && domTheme !== currentTheme && themes.find(t => t.id === domTheme)) {
+                setCurrentTheme(domTheme);
+            }
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
+
+        return () => observer.disconnect();
+    }, [currentTheme]);
+
+    useEffect(() => {
         document.documentElement.dataset.theme = currentTheme;
-        localStorage.setItem("waifuvault-theme", currentTheme);
+        localStorage.setItem(localStoreThemeKey, currentTheme);
     }, [currentTheme]);
 
     const setTheme = (theme: ThemeType) => {

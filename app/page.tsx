@@ -6,15 +6,21 @@ import { FileUpload } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize } from "./utils/upload";
 import UploadQueue from "./components/UploadQueue";
-import EnhancedDropZone from "@/app/components/EnhancedDropZone";
 import ThemeSelector from "@/app/components/ThemeSelector";
 import { ChunkedUploader } from "@/app/utils/chunkedUpload";
+
+import ParticleBackground from "@/app/components/ParticleBackground";
+import AdvancedDropZone from "@/app/components/AdvancedDropZone";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadItem[]>([]);
-    const [maxFileSize, setMaxFileSize] = useState<number>(1_048_576_000); // Default 1GB
+    const [maxFileSize, setMaxFileSize] = useState<number>(1_048_576_000);
     const [bannedTypes, setBannedTypes] = useState<string[]>([]);
+
+    const { currentTheme } = useTheme();
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         const fetchRestrictions = async () => {
@@ -36,6 +42,11 @@ export default function Home(): ReactElement {
 
         fetchRestrictions();
     }, []);
+
+    useEffect(() => {
+        const activeUploads = uploads.some(upload => upload.status === "uploading" || upload.status === "processing");
+        setIsUploading(activeUploads);
+    }, [uploads]);
 
     const addFiles = (files: FileList): void => {
         const newUploads: UploadItem[] = [...files].map(file => {
@@ -203,6 +214,13 @@ export default function Home(): ReactElement {
 
     return (
         <div className={styles.container}>
+            <ParticleBackground
+                isDragging={isDragging}
+                isUploading={isUploading}
+                theme={currentTheme}
+                intensity="medium"
+            />
+
             <div className={styles.header}>
                 <div className={styles.headerTop}>
                     <div className={styles.headerTopContent}>
@@ -211,7 +229,12 @@ export default function Home(): ReactElement {
                 </div>
 
                 <div className={styles.logo}>
-                    <a href={"https://waifuvault.moe"} rel="noopener noreferrer" target="_blank">
+                    <a
+                        href={"https://waifuvault.moe"}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        title="Visit Waifuvault main site"
+                    >
                         <div className={styles.logoImage}></div>
                     </a>
                 </div>
@@ -219,9 +242,10 @@ export default function Home(): ReactElement {
                 <p className={styles.subtitle}>Fast File Hosting</p>
             </div>
 
-            <EnhancedDropZone
+            <AdvancedDropZone
                 isDragging={isDragging}
                 maxFileSize={maxFileSize}
+                theme={currentTheme}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
