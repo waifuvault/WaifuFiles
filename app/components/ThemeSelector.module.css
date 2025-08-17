@@ -290,6 +290,17 @@
     background: #00ff00;
 }
 
+.previeworangeterminal {
+    background: #000000;
+    border: 1px solid #ffa500;
+}
+
+.previeworangeterminal .previewHeader,
+.previeworangeterminal .previewLine,
+.previeworangeterminal .previewButton {
+    background: #ffa500;
+}
+
 .themeInfo {
     flex: 1;
     min-width: 0;
