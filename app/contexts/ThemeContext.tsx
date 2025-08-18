@@ -83,6 +83,22 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }, []);
 
     useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const domTheme = document.documentElement.dataset.theme as ThemeType;
+            if (domTheme && domTheme !== currentTheme && themes.find(t => t.id === domTheme)) {
+                setCurrentTheme(domTheme);
+            }
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
+
+        return () => observer.disconnect();
+    }, [currentTheme]);
+
+    useEffect(() => {
         document.documentElement.dataset.theme = currentTheme;
         localStorage.setItem(localStoreThemeKey, currentTheme);
     }, [currentTheme]);
