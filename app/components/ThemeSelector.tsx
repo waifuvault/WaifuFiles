@@ -2,28 +2,29 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "./ThemeSelector.module.css";
-import { themes } from "@/app/contexts/ThemeContext";
+import { localStoreThemeKey, useTheme } from "@/app/contexts/ThemeContext";
+import { ThemeType } from "@/app/constants/theme";
 
 export default function ThemeSelector() {
-    const [currentTheme, setCurrentTheme] = useState<string>("anime");
+    const { currentTheme, setTheme, themes, particlesEnabled, setParticlesEnabled } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("waifuvault-theme");
+        const saved = localStorage.getItem(localStoreThemeKey) as ThemeType;
         if (saved && themes.some(theme => theme.id === saved)) {
-            setCurrentTheme(saved);
+            setTheme(saved);
             document.documentElement.dataset.theme = saved;
         }
     }, []);
 
-    const handleThemeChange = (themeId: string) => {
-        setCurrentTheme(themeId);
+    const handleThemeChange = (themeId: ThemeType) => {
+        setTheme(themeId);
         document.documentElement.dataset.theme = themeId;
         localStorage.setItem("waifuvault-theme", themeId);
         setIsOpen(false);
     };
 
-    const currentThemeData = themes.find(theme => theme.id === currentTheme) || themes[0];
+    const currentThemeData = themes.find(theme => theme.id === currentTheme) ?? themes[0];
 
     return (
         <div className={styles.themeSelector}>
@@ -56,6 +57,22 @@ export default function ThemeSelector() {
                         >
                             <i aria-hidden="true" className="bi-x"></i>
                         </button>
+                    </div>
+
+                    <div className={styles.particleToggle}>
+                        <label className={styles.toggleLabel}>
+                            <input
+                                type="checkbox"
+                                checked={particlesEnabled}
+                                onChange={e => setParticlesEnabled(e.target.checked)}
+                                className={styles.toggleInput}
+                            />
+                            <span className={styles.toggleSlider}></span>
+                            <span className={styles.toggleText}>
+                                <i className="bi-stars" aria-hidden="true"></i>
+                                Particle Effects
+                            </span>
+                        </label>
                     </div>
 
                     <div className={styles.themeGrid}>

@@ -29,7 +29,6 @@ export class ChunkedUploader {
         this.activeUploads.set(actualUploadId, mainController);
 
         try {
-            // Upload chunks with limited concurrency
             await this.uploadChunksConcurrently(file, totalChunks, actualUploadId, mainController.signal, onProgress);
 
             if (mainController.signal.aborted) {

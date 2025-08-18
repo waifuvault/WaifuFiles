@@ -1,4 +1,3 @@
-// eslint.config.js
 // @ts-check
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,6 +18,11 @@ const config = [
     eslintJs.configs.recommended,
     ...tseslint.configs.recommended,
     ...fixupConfigRules(compat.extends("next/core-web-vitals", "next")),
+    {
+        rules: {
+            curly: ["error", "all"],
+        },
+    },
 ];
 
 export default config;

@@ -3,8 +3,9 @@ import { FileUpload } from "waifuvault-node-api";
 import styles from "../page.module.css";
 import { copyToClipboard, formatFileSize } from "../utils/upload";
 import OptionsPanel from "./OptionsPanel";
-import FilePreview from "./FilePreview";
+import Enhanced3DFilePreview from "./Enhanced3DFilePreview";
 import { UploadItem as UploadItemType } from "../types/upload";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 interface UploadItemProps {
     index: number;
@@ -26,6 +27,7 @@ export default function UploadItem({
     upload,
 }: UploadItemProps) {
     const [copied, setCopied] = useState(false);
+    const { currentTheme } = useTheme();
 
     const handleCopy = async () => {
         if (upload.result?.url) {
@@ -53,7 +55,13 @@ export default function UploadItem({
     return (
         <div className={`${styles.uploadItem} ${styles[upload.status]}`}>
             <div className={styles.uploadItemHeader}>
-                <FilePreview file={upload.file} size="medium" />
+                <Enhanced3DFilePreview
+                    file={upload.file}
+                    size="medium"
+                    interactive={true}
+                    showMetadata={upload.status === "completed"}
+                    theme={currentTheme}
+                />
 
                 <div className={styles.fileInfo}>
                     <span className={styles.fileName}>{upload.file.name}</span>
