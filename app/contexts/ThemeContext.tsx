@@ -4,6 +4,7 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import { ThemeType } from "@/app/constants/theme";
 
 export const localStoreThemeKey = "waifuvault-theme";
+export const localStoreParticlesKey = "waifuvault-particles-enabled";
 
 export interface Theme {
     description: string;
@@ -55,6 +56,8 @@ interface ThemeContextType {
     currentTheme: ThemeType;
     setTheme: (theme: ThemeType) => void;
     themes: Theme[];
+    particlesEnabled: boolean;
+    setParticlesEnabled: (enabled: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -65,29 +68,19 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
     const [currentTheme, setCurrentTheme] = useState<ThemeType>(ThemeType.DEFAULT);
+    const [particlesEnabled, setParticlesEnabledState] = useState<boolean>(true);
 
     useEffect(() => {
         const savedTheme = localStorage.getItem(localStoreThemeKey) as ThemeType;
         if (savedTheme && themes.find(t => t.id === savedTheme)) {
             setCurrentTheme(savedTheme);
         }
+
+        const savedParticles = localStorage.getItem(localStoreParticlesKey);
+        if (savedParticles !== null) {
+            setParticlesEnabledState(savedParticles === "true");
+        }
     }, []);
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            const domTheme = document.documentElement.dataset.theme as ThemeType;
-            if (domTheme && domTheme !== currentTheme && themes.find(t => t.id === domTheme)) {
-                setCurrentTheme(domTheme);
-            }
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, [currentTheme]);
 
     useEffect(() => {
         document.documentElement.dataset.theme = currentTheme;
@@ -98,7 +91,24 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         setCurrentTheme(theme);
     };
 
-    return <ThemeContext.Provider value={{ currentTheme, setTheme, themes }}>{children}</ThemeContext.Provider>;
+    const setParticlesEnabled = (enabled: boolean) => {
+        setParticlesEnabledState(enabled);
+        localStorage.setItem(localStoreParticlesKey, enabled.toString());
+    };
+
+    return (
+        <ThemeContext.Provider
+            value={{
+                currentTheme,
+                setTheme,
+                themes,
+                particlesEnabled,
+                setParticlesEnabled,
+            }}
+        >
+            {children}
+        </ThemeContext.Provider>
+    );
 }
 
 export function useTheme() {

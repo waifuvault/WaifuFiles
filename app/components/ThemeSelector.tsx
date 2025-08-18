@@ -6,7 +6,7 @@ import { localStoreThemeKey, useTheme } from "@/app/contexts/ThemeContext";
 import { ThemeType } from "@/app/constants/theme";
 
 export default function ThemeSelector() {
-    const { currentTheme, setTheme, themes } = useTheme();
+    const { currentTheme, setTheme, themes, particlesEnabled, setParticlesEnabled } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function ThemeSelector() {
         setIsOpen(false);
     };
 
-    const currentThemeData = themes.find(theme => theme.id === currentTheme) || themes[0];
+    const currentThemeData = themes.find(theme => theme.id === currentTheme) ?? themes[0];
 
     return (
         <div className={styles.themeSelector}>
@@ -57,6 +57,22 @@ export default function ThemeSelector() {
                         >
                             <i aria-hidden="true" className="bi-x"></i>
                         </button>
+                    </div>
+
+                    <div className={styles.particleToggle}>
+                        <label className={styles.toggleLabel}>
+                            <input
+                                type="checkbox"
+                                checked={particlesEnabled}
+                                onChange={e => setParticlesEnabled(e.target.checked)}
+                                className={styles.toggleInput}
+                            />
+                            <span className={styles.toggleSlider}></span>
+                            <span className={styles.toggleText}>
+                                <i className="bi-stars" aria-hidden="true"></i>
+                                Particle Effects
+                            </span>
+                        </label>
                     </div>
 
                     <div className={styles.themeGrid}>

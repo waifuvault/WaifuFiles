@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./ParticleBackground.module.css";
 import { ThemeType } from "@/app/constants/theme";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 interface Particle {
     x: number;
@@ -36,6 +37,8 @@ export default function ParticleBackground({
     const particlesRef = useRef<Particle[]>([]);
     const mouseRef = useRef({ x: 0, y: 0 });
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    const { particlesEnabled } = useTheme();
 
     const getThemeConfig = (currentTheme: ThemeType) => {
         switch (currentTheme) {
@@ -336,6 +339,10 @@ export default function ParticleBackground({
             }
         };
     }, [dimensions, theme, isDragging, isUploading, intensity, getParticleCount, createParticle, animate]);
+
+    if (!particlesEnabled) {
+        return null;
+    }
 
     return (
         <canvas
