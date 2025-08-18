@@ -1,0 +1,405 @@
+.clipboardIndicator {
+    position: relative;
+    max-width: 600px;
+    margin: 1rem auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    animation: slideUp 0.3s ease-out;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.clipboardIndicator:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-secondary);
+}
+
+.themeAnime {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.themeAnime::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 12px;
+    mask:
+        linear-gradient(#fff 0 0, #fff 100%, #fff 100%) content-box,
+        linear-gradient(#fff 0 0, #fff 100%, #fff 100%);
+    mask-composite: exclude;
+    z-index: -1;
+}
+
+.themeAnime:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+    box-shadow:
+        0 20px 40px rgba(102, 126, 234, 0.3),
+        0 0 30px rgba(118, 75, 162, 0.4);
+}
+
+.themeCyberpunk {
+    background: var(--bg-secondary);
+    border: 2px solid #00ffff;
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 255, 255, 0.05);
+    position: relative;
+    color: #00ffff;
+}
+
+.themeCyberpunk:hover {
+    background: var(--bg-tertiary);
+    border-color: #ff00ff;
+    box-shadow:
+        0 0 30px rgba(255, 0, 255, 0.4),
+        inset 0 0 30px rgba(255, 0, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Cyberpunk specific text colors */
+.themeCyberpunk .message {
+    color: #00ffff;
+}
+
+.themeCyberpunk .urlPreview {
+    color: #ff00ff;
+}
+
+.themeCyberpunk .icon {
+    color: #00ff00;
+}
+
+.themeCyberpunk .pasteButton {
+    background: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #ffff00 100%);
+    color: #000;
+    font-weight: 600;
+    text-shadow: none;
+    border: 1px solid #00ffff;
+}
+
+.themeCyberpunk .pasteButton:hover {
+    background: linear-gradient(135deg, #ff00ff 0%, #ffff00 50%, #00ffff 100%);
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.5),
+        0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.themeCyberpunk .shortcut {
+    background: rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.5);
+}
+
+.themeCyberpunk .clipboardIcon {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.themeTerminal,
+.themeOrangeterminal {
+    background: rgba(0, 0, 0, 0.95);
+    font-family: "Courier New", monospace;
+}
+
+.themeTerminal {
+    border-color: #00ff00;
+    box-shadow:
+        inset 0 0 20px rgba(0, 255, 0, 0.1),
+        0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.themeOrangeterminal {
+    border-color: #ffa500;
+    box-shadow:
+        inset 0 0 20px rgba(255, 165, 0, 0.1),
+        0 0 20px rgba(255, 165, 0, 0.3);
+}
+
+.themeTerminal:hover {
+    box-shadow:
+        inset 0 0 30px rgba(0, 255, 0, 0.2),
+        0 0 40px rgba(0, 255, 0, 0.5);
+}
+
+.themeOrangeterminal:hover {
+    box-shadow:
+        inset 0 0 30px rgba(255, 165, 0, 0.2),
+        0 0 40px rgba(255, 165, 0, 0.5);
+}
+
+.themeMinimal {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 123, 255, 0.4);
+    color: #333;
+}
+
+.themeMinimal:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 15px 40px rgba(0, 123, 255, 0.2);
+}
+
+/* Content Layout */
+.clipboardContent {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.previewImage {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-secondary);
+    flex-shrink: 0;
+}
+
+.previewImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clipboardInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.clipboardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.icon {
+    font-size: 1.2rem;
+    color: var(--text-accent);
+}
+
+.clipboardText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.message {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.urlPreview {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-family: "Monaco", "Consolas", monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pasteButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.pasteButton:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-secondary);
+}
+
+.pasteButton:active {
+    transform: translateY(0);
+}
+
+.shortcut {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    font-family: "Monaco", "Consolas", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Terminal cursor animation */
+.terminalCursor {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.cursor {
+    color: var(--text-accent);
+    animation: blink 1s infinite;
+    font-family: "Courier New", monospace;
+    font-size: 0.8rem;
+}
+
+@keyframes blink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Cyberpunk glow effect */
+.cyberpunkGlow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+    background-size: 400% 400%;
+    border-radius: 14px;
+    z-index: -1;
+    animation: cyberpunkPulse 4s ease-in-out infinite;
+    opacity: 0.2;
+}
+
+@keyframes cyberpunkPulse {
+    0%,
+    100% {
+        background-position: 0% 50%;
+        opacity: 0.1;
+    }
+    50% {
+        background-position: 100% 50%;
+        opacity: 0.3;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pasteButton:not(.themeCyberpunk .pasteButton) {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%,
+    100% {
+        box-shadow: 0 0 5px var(--text-accent);
+    }
+    50% {
+        box-shadow:
+            0 0 20px var(--text-accent),
+            0 0 30px var(--text-accent);
+    }
+}
+
+/* Cyberpunk specific pulse */
+.themeCyberpunk .pasteButton {
+    animation: cyberpunkButtonPulse 2s ease-in-out infinite;
+}
+
+@keyframes cyberpunkButtonPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 10px #00ffff;
+    }
+    50% {
+        box-shadow:
+            0 0 20px #00ffff,
+            0 0 30px #ff00ff,
+            0 0 40px #ffff00;
+    }
+}
+
+@media (max-width: 768px) {
+    .clipboardIndicator {
+        margin: 1rem;
+        padding: 0.75rem;
+    }
+
+    .clipboardContent {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+
+    .clipboardInfo {
+        justify-content: center;
+    }
+
+    .pasteButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .urlPreview {
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clipboardIndicator,
+    .cursor,
+    .cyberpunkGlow,
+    .pasteButton {
+        animation: none !important;
+    }
+
+    .clipboardIndicator:hover {
+        transform: none !important;
+    }
+}

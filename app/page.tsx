@@ -13,6 +13,11 @@ import ParticleBackground from "@/app/components/ParticleBackground";
 import AdvancedDropZone from "@/app/components/AdvancedDropZone";
 import { useTheme } from "@/app/contexts/ThemeContext";
 
+import { useNotifications } from "@/app/hooks/useNotifications";
+import { NotificationContainer } from "@/app/components/NotificationContainer";
+import ClipboardIndicator from "@/app/components/ClipboardIndicator";
+import { useClipboard } from "@/app/hooks/useClipboard";
+
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadItem[]>([]);
@@ -21,6 +26,8 @@ export default function Home(): ReactElement {
 
     const { currentTheme } = useTheme();
     const [isUploading, setIsUploading] = useState(false);
+
+    const { notifications, addNotification, removeNotification } = useNotifications();
 
     useEffect(() => {
         const fetchRestrictions = async () => {
@@ -47,6 +54,48 @@ export default function Home(): ReactElement {
         const activeUploads = uploads.some(upload => upload.status === "uploading" || upload.status === "processing");
         setIsUploading(activeUploads);
     }, [uploads]);
+
+    const handleClipboardFiles = (files: File[]) => {
+        console.log("handleClipboardFiles called with:", files);
+        const fileList = new DataTransfer();
+        files.forEach(file => fileList.items.add(file));
+        addFiles(fileList.files);
+
+        addNotification({
+            type: "success",
+            title: "Files pasted from clipboard",
+            message: `${files.length} file${files.length > 1 ? "s" : ""} added to upload queue`,
+            duration: 3000,
+        });
+    };
+
+    const handleClipboardUrl = async (url: string) => {
+        console.log("handleClipboardUrl called with:", url);
+        try {
+            addNotification({
+                type: "info",
+                title: "URL detected in clipboard",
+                message: "URL download feature coming soon!",
+                duration: 4000,
+            });
+
+            console.log("URL from clipboard:", url);
+        } catch (error) {
+            console.error("Failed to handle clipboard URL:", error);
+            addNotification({
+                type: "error",
+                title: "Failed to process URL",
+                message: "Could not process the URL from clipboard",
+                duration: 4000,
+            });
+        }
+    };
+
+    const { clipboardContent, pasteFromClipboard } = useClipboard({
+        onFilesDetected: handleClipboardFiles,
+        onUrlDetected: handleClipboardUrl,
+        enabled: !isUploading && !isDragging,
+    });
 
     const addFiles = (files: FileList): void => {
         const newUploads: UploadItem[] = [...files].map(file => {
@@ -221,6 +270,8 @@ export default function Home(): ReactElement {
                 intensity="medium"
             />
 
+            <NotificationContainer notifications={notifications} onRemove={removeNotification} />
+
             <div className={styles.header}>
                 <div className={styles.headerTop}>
                     <div className={styles.headerTopContent}>
@@ -252,7 +303,13 @@ export default function Home(): ReactElement {
                 onDrop={handleDrop}
                 onFileSelect={handleFileSelect}
             />
-
+            {!isDragging && !isUploading && (
+                <ClipboardIndicator
+                    clipboardContent={clipboardContent}
+                    onPaste={pasteFromClipboard}
+                    theme={currentTheme}
+                />
+            )}
             <UploadQueue
                 onClearAll={clearUploads}
                 onRemove={removeUpload}
