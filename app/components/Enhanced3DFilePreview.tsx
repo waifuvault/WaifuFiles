@@ -31,7 +31,7 @@ export default function Enhanced3DFilePreview({
     const [metadata, setMetadata] = useState<FileMetadata>({});
     const [isLoading, setIsLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
-    const [rotation, setRotation] = useState({ x: 0, y: 0 });
+
     const containerRef = useRef<HTMLDivElement>(null);
     const animationRef = useRef<number>(null);
 
@@ -67,18 +67,49 @@ export default function Enhanced3DFilePreview({
 
                 if (file.type.startsWith("video/")) {
                     const video = document.createElement("video");
-                    video.onloadedmetadata = () => {
-                        if (mounted) {
+                    video.preload = "metadata";
+                    video.muted = true;
+                    video.crossOrigin = "anonymous";
+
+                    const handleMetadataLoaded = () => {
+                        if (mounted && video.duration && !isNaN(video.duration)) {
                             setMetadata(prev => ({
                                 ...prev,
                                 dimensions: `${video.videoWidth}×${video.videoHeight}`,
                                 duration: formatDuration(video.duration),
                             }));
                         }
+                        video.removeEventListener("loadedmetadata", handleMetadataLoaded);
+                        video.removeEventListener("error", handleError);
+                        video.remove();
                     };
-                    if (previewData.url) {
-                        video.src = previewData.url;
-                    }
+
+                    const handleError = (e: Event) => {
+                        console.log("Failed to load video metadata:", e);
+                        video.removeEventListener("loadedmetadata", handleMetadataLoaded);
+                        video.removeEventListener("error", handleError);
+                        video.remove();
+                    };
+
+                    video.addEventListener("loadedmetadata", handleMetadataLoaded);
+                    video.addEventListener("error", handleError);
+
+                    const videoUrl = URL.createObjectURL(file);
+                    video.src = videoUrl;
+
+                    video.style.display = "none";
+                    document.body.appendChild(video);
+
+                    video.load();
+
+                    const cleanup = () => {
+                        URL.revokeObjectURL(videoUrl);
+                        if (video.parentNode) {
+                            video.parentNode.removeChild(video);
+                        }
+                    };
+
+                    setTimeout(cleanup, 10000);
                 }
 
                 if (file.type.startsWith("audio/")) {
@@ -131,43 +162,37 @@ export default function Enhanced3DFilePreview({
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        const rotateY = (e.clientX - centerX) / 10;
-        const rotateX = -(e.clientY - centerY) / 10;
+        const baseRotationX = -5;
+        const baseRotationY = 5;
 
-        setRotation({ x: rotateX, y: rotateY });
+        const rotateY = baseRotationY + (e.clientX - centerX) / 6;
+        const rotateX = baseRotationX - (e.clientY - centerY) / 6;
+
+        containerRef.current.style.transition = "none";
+
+        containerRef.current.style.setProperty("--rotate-x", `${rotateX}deg`);
+        containerRef.current.style.setProperty("--rotate-y", `${rotateY}deg`);
     };
 
     const handleMouseLeave = () => {
-        setRotation({ x: 0, y: 0 });
         setIsHovered(false);
+        if (containerRef.current) {
+            containerRef.current.style.transition = "";
+            containerRef.current.style.setProperty("--rotate-x", "-5deg");
+            containerRef.current.style.setProperty("--rotate-y", "5deg");
+        }
     };
 
     const handleMouseEnter = () => {
         setIsHovered(true);
-    };
-
-    // Floating animation for certain themes
-    useEffect(() => {
-        if (theme === ThemeType.ANIME && !isHovered) {
-            const animate = () => {
-                const time = Date.now() * 0.002;
-                setRotation({
-                    x: Math.sin(time) * 2,
-                    y: Math.cos(time * 0.7) * 3,
-                });
-                animationRef.current = requestAnimationFrame(animate);
-            };
-            animationRef.current = requestAnimationFrame(animate);
-        } else if (animationRef.current) {
+        if (animationRef.current) {
             cancelAnimationFrame(animationRef.current);
+            animationRef.current = null;
         }
-
-        return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-        };
-    }, [theme, isHovered]);
+        if (containerRef.current) {
+            containerRef.current.style.transition = "none";
+        }
+    };
 
     const sizeClass = `filePreview${size.charAt(0).toUpperCase() + size.slice(1)}`;
     const themeClass = theme ? `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}` : "";
@@ -236,7 +261,7 @@ export default function Enhanced3DFilePreview({
                         )}
                         <div className={styles.playOverlay}>
                             <div className={styles.playButton}>
-                                <i aria-hidden="true" className="bi bi-play-fill"></i>
+                                <i aria-hidden="true" className="bi bi-film"></i>
                             </div>
                         </div>
                         {metadata.duration && <div className={styles.durationBadge}>{metadata.duration}</div>}
@@ -295,9 +320,13 @@ export default function Enhanced3DFilePreview({
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             onMouseEnter={handleMouseEnter}
-            style={{
-                transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-            }}
+            style={
+                {
+                    transform: `perspective(1000px) rotateX(var(--rotate-x, -5deg)) rotateY(var(--rotate-y, 5deg))`,
+                    "--rotate-x": "-5deg",
+                    "--rotate-y": "5deg",
+                } as React.CSSProperties
+            }
         >
             <div className={styles.previewInner}>
                 {renderPreviewContent()}
