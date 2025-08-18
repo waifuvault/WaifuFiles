@@ -327,10 +327,8 @@ export default function ParticleBackground({
         canvas.width = dimensions.width;
         canvas.height = dimensions.height;
 
-        // Initialize particles
         particlesRef.current = Array.from({ length: getParticleCount() }, () => createParticle());
 
-        // Start animation
         animationRef.current = requestAnimationFrame(animate);
 
         return () => {

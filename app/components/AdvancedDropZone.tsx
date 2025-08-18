@@ -198,7 +198,6 @@ export default function AdvancedDropZone({
             onDrop={handleDrop}
         >
             <input multiple onChange={onFileSelect} ref={fileInputRef} style={{ display: "none" }} type="file" />
-
             {ripples.map(ripple => (
                 <div
                     key={ripple.id}
