@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { ThemeType } from "@/app/constants/theme";
 
 export const localStoreThemeKey = "waifuvault-theme";
@@ -103,14 +103,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         localStorage.setItem(localStoreThemeKey, currentTheme);
     }, [currentTheme]);
 
-    const setTheme = (theme: ThemeType) => {
+    const setTheme = useCallback((theme: ThemeType) => {
         setCurrentTheme(theme);
-    };
+    }, []);
 
-    const setParticlesEnabled = (enabled: boolean) => {
+    const setParticlesEnabled = useCallback((enabled: boolean) => {
         setParticlesEnabledState(enabled);
         localStorage.setItem(localStoreParticlesKey, enabled.toString());
-    };
+    }, []);
 
     return (
         <ThemeContext.Provider

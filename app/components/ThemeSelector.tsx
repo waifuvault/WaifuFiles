@@ -15,7 +15,7 @@ export default function ThemeSelector() {
             setTheme(saved);
             document.documentElement.dataset.theme = saved;
         }
-    }, []);
+    }, [setTheme, themes]);
 
     const handleThemeChange = (themeId: ThemeType) => {
         setTheme(themeId);
