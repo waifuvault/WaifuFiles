@@ -1065,3 +1065,124 @@
         max-width: 50px;
     }
 }
+
+/* Add these styles to your existing page.module.css */
+
+/* Update the completed section to handle multiple buttons */
+.completed {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.completedActions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* QR Code Button */
+.qrBtn {
+    background: var(--text-accent);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.qrBtn:hover {
+    background: var(--text-accent);
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-secondary);
+}
+
+.qrBtn i {
+    font-size: 1rem;
+}
+
+/* Theme-specific QR button styles */
+[data-theme="cyberpunk"] .qrBtn {
+    background: #00ffff;
+    color: #000;
+    border: 1px solid #00ffff;
+    text-shadow: none;
+    box-shadow: 0 0 10px #00ffff;
+}
+
+[data-theme="cyberpunk"] .qrBtn:hover {
+    background: #ff00ff;
+    border-color: #ff00ff;
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+[data-theme="terminal"] .qrBtn {
+    background: #00ff00;
+    color: #000;
+    font-family: "Courier New", monospace;
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+[data-theme="orangeterminal"] .qrBtn {
+    background: #ffa500;
+    color: #000;
+    font-family: "Courier New", monospace;
+    border: 1px solid #ffa500;
+    box-shadow: 0 0 10px #ffa500;
+}
+
+[data-theme="minimal"] .qrBtn {
+    background: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+
+[data-theme="minimal"] .qrBtn:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Mobile responsive updates */
+@media (max-width: 768px) {
+    .completed {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .completedActions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .urlInput {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .qrBtn {
+        min-width: 80px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .completedActions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .qrBtn {
+        width: 100%;
+    }
+}

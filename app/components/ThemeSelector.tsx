@@ -37,7 +37,11 @@ export default function ThemeSelector() {
                 }}
             >
                 <i aria-hidden="true" className={`${currentThemeData.icon} ${styles.themeIcon}`}></i>
-                <span className={styles.themeText}>{currentThemeData.name}</span>
+                <span className={styles.themeText}>
+                    <span className={styles.themeLabel}>Theme</span>
+                    <span className={styles.themeSeparator}>: </span>
+                    <span className={styles.themeName}>{currentThemeData.name}</span>
+                </span>
                 <i
                     aria-hidden="true"
                     className={`bi-chevron-down ${styles.chevron} ${isOpen ? styles.chevronUp : styles.chevronDown}`}

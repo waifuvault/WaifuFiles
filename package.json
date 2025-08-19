@@ -1,4 +1,3 @@
-
 {
   "name": "waifuvault-uploader",
   "version": "0.1.0",
@@ -17,12 +16,15 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier ./app --check",
     "prettier:fix": "prettier ./app --write",
+    "update_deps": "npx npm-check-updates",
     "prepare": "husky"
   },
   "dependencies": {
+    "@types/qrcode": "^1.5.5",
     "bootstrap-icons": "^1.13.1",
     "globals": "^16.3.0",
-    "next": "^15.4.6",
+    "next": "^15.4.7",
+    "qrcode": "^1.5.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "waifuvault-node-api": "^1.8.0"
@@ -31,13 +33,13 @@
     "@eslint/compat": "^1.3.2",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.33.0",
-    "@next/eslint-plugin-next": "^15.4.6",
+    "@next/eslint-plugin-next": "^15.4.7",
     "@trumpet/eslint-config-next": "^1.9.0",
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.33.0",
-    "eslint-config-next": "^15.4.6",
+    "eslint-config-next": "^15.4.7",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -46,7 +48,7 @@
     "prettier": "^3.6.2",
     "tsc-files": "^1.1.4",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "^8.40.0"
   },
   "lint-staged": {
     "app/**/*.{ts,tsx,js,jsx}": [
