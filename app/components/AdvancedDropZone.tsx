@@ -183,7 +183,7 @@ export default function AdvancedDropZone({
                 return "Drop files or click to browse";
             case ThemeType.DEFAULT:
             default:
-                return "Drop files here or click to select";
+                return "Drop Files Here Or Click To Select";
         }
     };
 
