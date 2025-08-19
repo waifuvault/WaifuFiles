@@ -244,6 +244,7 @@ export default function Home(): ReactElement {
         if (files && files.length > 0) {
             addFiles(files);
         }
+        e.target.value = "";
     };
 
     const clearUploads = () => {
