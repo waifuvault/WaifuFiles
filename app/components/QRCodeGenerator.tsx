@@ -10,15 +10,16 @@ interface QRCodeGeneratorProps {
     url: string;
     fileName: string;
     onClose: () => void;
+    embedded?: boolean;
 }
 
-export default function QRCodeGenerator({ url, fileName, onClose }: QRCodeGeneratorProps) {
+export default function QRCodeGenerator({ url, fileName, onClose, embedded = false }: QRCodeGeneratorProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isGenerating, setIsGenerating] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [downloaded, setDownloaded] = useState(false);
-    const { currentTheme: theme } = useTheme();
+    const { currentTheme: theme, getThemeClass } = useTheme();
 
     useEffect(() => {
         const getThemeColors = () => {
@@ -125,7 +126,68 @@ export default function QRCodeGenerator({ url, fileName, onClose }: QRCodeGenera
         }
     };
 
-    const themeClass = theme ? `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}` : "";
+    const themeClass = getThemeClass();
+
+    const content = (
+        <>
+            <div className={styles.qrContainer} style={{ display: isGenerating || error ? "none" : "block" }}>
+                <canvas ref={canvasRef} className={styles.qrCode} />
+                <div className={styles.qrOverlay}>
+                    <div className={styles.qrInfo}>
+                        <i className="bi-link-45deg" aria-hidden="true"></i>
+                        <span className={styles.urlPreview}>{url.length > 40 ? `${url.slice(0, 37)}...` : url}</span>
+                    </div>
+                </div>
+            </div>
+
+            {isGenerating && (
+                <div className={styles.loading}>
+                    <div className={styles.spinner}></div>
+                    <span>Generating QR code...</span>
+                </div>
+            )}
+
+            {error && (
+                <div className={styles.error}>
+                    <i className="bi-exclamation-triangle" aria-hidden="true"></i>
+                    <span>{error}</span>
+                </div>
+            )}
+
+            {!isGenerating && !error && (
+                <>
+                    <div className={styles.actions}>
+                        <button
+                            className={`${styles.actionButton} ${styles.downloadButton} ${downloaded ? styles.downloaded : ""}`}
+                            onClick={handleDownload}
+                        >
+                            <i className={downloaded ? "bi-check-circle-fill" : "bi-download"} aria-hidden="true"></i>
+                            {downloaded ? "Downloaded!" : "Download PNG"}
+                        </button>
+
+                        <button
+                            className={`${styles.actionButton} ${styles.copyButton} ${copied ? styles.copied : ""}`}
+                            onClick={handleCopyToClipboard}
+                        >
+                            <i className={copied ? "bi-check-circle-fill" : "bi-clipboard"} aria-hidden="true"></i>
+                            {copied ? "Copied!" : "Copy to Clipboard"}
+                        </button>
+                    </div>
+
+                    <div className={styles.info}>
+                        <p className={styles.infoText}>
+                            <i className="bi-info-circle" aria-hidden="true"></i>
+                            Scan this QR code to access your uploaded file
+                        </p>
+                    </div>
+                </>
+            )}
+        </>
+    );
+
+    if (embedded) {
+        return <div className={styles[themeClass]}>{content}</div>;
+    }
 
     return (
         <div className={`${styles.overlay} ${styles[themeClass]}`} onClick={onClose}>
@@ -140,68 +202,7 @@ export default function QRCodeGenerator({ url, fileName, onClose }: QRCodeGenera
                     </button>
                 </div>
 
-                <div className={styles.content}>
-                    <div className={styles.qrContainer} style={{ display: isGenerating || error ? "none" : "block" }}>
-                        <canvas ref={canvasRef} className={styles.qrCode} />
-                        <div className={styles.qrOverlay}>
-                            <div className={styles.qrInfo}>
-                                <i className="bi-link-45deg" aria-hidden="true"></i>
-                                <span className={styles.urlPreview}>
-                                    {url.length > 40 ? `${url.slice(0, 37)}...` : url}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {isGenerating && (
-                        <div className={styles.loading}>
-                            <div className={styles.spinner}></div>
-                            <span>Generating QR code...</span>
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className={styles.error}>
-                            <i className="bi-exclamation-triangle" aria-hidden="true"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    {!isGenerating && !error && (
-                        <>
-                            <div className={styles.actions}>
-                                <button
-                                    className={`${styles.actionButton} ${styles.downloadButton} ${downloaded ? styles.downloaded : ""}`}
-                                    onClick={handleDownload}
-                                >
-                                    <i
-                                        className={downloaded ? "bi-check-circle-fill" : "bi-download"}
-                                        aria-hidden="true"
-                                    ></i>
-                                    {downloaded ? "Downloaded!" : "Download PNG"}
-                                </button>
-
-                                <button
-                                    className={`${styles.actionButton} ${styles.copyButton} ${copied ? styles.copied : ""}`}
-                                    onClick={handleCopyToClipboard}
-                                >
-                                    <i
-                                        className={copied ? "bi-check-circle-fill" : "bi-clipboard"}
-                                        aria-hidden="true"
-                                    ></i>
-                                    {copied ? "Copied!" : "Copy to Clipboard"}
-                                </button>
-                            </div>
-
-                            <div className={styles.info}>
-                                <p className={styles.infoText}>
-                                    <i className="bi-info-circle" aria-hidden="true"></i>
-                                    Scan this QR code to access your uploaded file
-                                </p>
-                            </div>
-                        </>
-                    )}
-                </div>
+                <div className={styles.content}>{content}</div>
             </div>
         </div>
     );

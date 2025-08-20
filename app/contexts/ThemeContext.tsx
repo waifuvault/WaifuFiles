@@ -58,6 +58,7 @@ interface ThemeContextType {
     themes: Theme[];
     particlesEnabled: boolean;
     setParticlesEnabled: (enabled: boolean) => void;
+    getThemeClass: () => string;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -112,6 +113,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         localStorage.setItem(localStoreParticlesKey, enabled.toString());
     }, []);
 
+    const getThemeClass = useCallback(() => {
+        return currentTheme ? `theme${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}` : "";
+    }, [currentTheme]);
+
     return (
         <ThemeContext.Provider
             value={{
@@ -120,6 +125,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
                 themes,
                 particlesEnabled,
                 setParticlesEnabled,
+                getThemeClass,
             }}
         >
             {children}

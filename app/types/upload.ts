@@ -6,12 +6,13 @@ export interface Restriction {
 }
 
 export interface UploadItem {
-    error?: string;
+    id: string; // stable identity for UI updates
     file: File;
     options: Partial<FileUpload>;
+    status: "pending" | "queued" | "uploading" | "processing" | "completed" | "error";
     progress?: number;
     result?: WaifuFile;
-    showOptions?: boolean;
-    status: "completed" | "error" | "pending" | "processing" | "uploading";
+    error?: string;
     uploadId?: string;
+    showOptions?: boolean;
 }

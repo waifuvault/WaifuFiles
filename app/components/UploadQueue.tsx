@@ -6,11 +6,11 @@ import { UploadItem as UploadItemType } from "../types/upload";
 
 interface UploadQueueProps {
     onClearAll: () => void;
-    onRemove: (index: number) => void;
-    onResetToPending: (index: number) => void;
-    onToggleOptions: (index: number) => void;
-    onUpdateOptions: (index: number, options: Partial<FileUpload>) => void;
-    onUpload: (index: number) => void;
+    onRemove: (id: string) => void;
+    onResetToPending: (id: string) => void;
+    onToggleOptions: (id: string) => void;
+    onUpdateOptions: (id: string, options: Partial<FileUpload>) => void;
+    onUpload: (id: string) => void;
     onUploadAll: () => void;
     uploads: UploadItemType[];
 }
@@ -49,10 +49,9 @@ export default function UploadQueue({
             </div>
 
             <div className={styles.uploadList}>
-                {uploads.map((upload, index) => (
+                {uploads.map(upload => (
                     <UploadItem
-                        index={index}
-                        key={index}
+                        key={upload.id}
                         onRemove={onRemove}
                         onResetToPending={onResetToPending}
                         onToggleOptions={onToggleOptions}

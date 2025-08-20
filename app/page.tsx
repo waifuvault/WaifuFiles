@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useState } from "react";
+import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import { FileUpload } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
@@ -11,12 +11,13 @@ import { ChunkedUploader } from "@/app/utils/chunkedUpload";
 
 import ParticleBackground from "@/app/components/ParticleBackground";
 import AdvancedDropZone from "@/app/components/AdvancedDropZone";
-import { useTheme } from "@/app/contexts/ThemeContext";
 
 import { useNotifications } from "@/app/hooks/useNotifications";
 import { NotificationContainer } from "@/app/components/NotificationContainer";
 import ClipboardIndicator from "@/app/components/ClipboardIndicator";
 import { useClipboard } from "@/app/hooks/useClipboard";
+
+const MAX_CONCURRENT_UPLOADS = 3;
 
 export default function Home(): ReactElement {
     const [isDragging, setIsDragging] = useState(false);
@@ -24,10 +25,12 @@ export default function Home(): ReactElement {
     const [maxFileSize, setMaxFileSize] = useState<number>(1_048_576_000);
     const [bannedTypes, setBannedTypes] = useState<string[]>([]);
 
-    const { currentTheme } = useTheme();
     const [isUploading, setIsUploading] = useState(false);
 
     const { notifications, addNotification, removeNotification } = useNotifications();
+
+    const previousUploadStatusesRef = useRef<Map<number, string>>(new Map());
+    const uploadSessionRef = useRef(0);
 
     useEffect(() => {
         const fetchRestrictions = async () => {
@@ -53,6 +56,37 @@ export default function Home(): ReactElement {
     useEffect(() => {
         const activeUploads = uploads.some(upload => upload.status === "uploading" || upload.status === "processing");
         setIsUploading(activeUploads);
+    }, [uploads]);
+
+    useEffect(() => {
+        const currentStatuses = new Map<number, string>();
+        let shouldScroll = false;
+
+        uploads.forEach((upload, index) => {
+            const previousStatus = previousUploadStatusesRef.current.get(index);
+            const currentStatus = upload.status;
+
+            currentStatuses.set(index, currentStatus);
+
+            if (
+                previousStatus &&
+                previousStatus !== currentStatus &&
+                (currentStatus === "completed" || currentStatus === "error")
+            ) {
+                shouldScroll = true;
+            }
+        });
+
+        previousUploadStatusesRef.current = currentStatuses;
+
+        if (shouldScroll) {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: document.documentElement.scrollHeight,
+                    behavior: "smooth",
+                });
+            }, 100);
+        }
     }, [uploads]);
 
     const handleClipboardFiles = (files: File[]) => {
@@ -99,8 +133,11 @@ export default function Home(): ReactElement {
 
     const addFiles = (files: FileList): void => {
         const newUploads: UploadItem[] = [...files].map(file => {
+            const id = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
+
             if (file.size > maxFileSize) {
                 return {
+                    id,
                     error: `File too large (${formatFileSize(file.size)}). Max size: ${formatFileSize(maxFileSize)}`,
                     file,
                     options: {},
@@ -110,6 +147,7 @@ export default function Home(): ReactElement {
 
             if (bannedTypes.length > 0 && bannedTypes.includes(file.type)) {
                 return {
+                    id,
                     error: `File type not allowed: ${file.type}`,
                     file,
                     options: {},
@@ -118,6 +156,7 @@ export default function Home(): ReactElement {
             }
 
             return {
+                id,
                 file,
                 options: {},
                 status: "pending" as const,
@@ -126,88 +165,140 @@ export default function Home(): ReactElement {
         setUploads(prev => [...prev, ...newUploads]);
     };
 
-    const uploadFile = async (uploadIndex: number) => {
-        const upload = uploads[uploadIndex];
-        if (!upload || (upload.status !== "pending" && upload.status !== "error")) {
+    const uploadFile = async (uploadIdOrIndex: string | number, session?: number) => {
+        const sessionId = session ?? uploadSessionRef.current;
+
+        const getIndexById = (id: string) => uploads.findIndex(u => u.id === id);
+
+        const id = typeof uploadIdOrIndex === "string" ? uploadIdOrIndex : uploads[uploadIdOrIndex]?.id;
+        if (!id) {
             return;
         }
 
-        const uploadId = ChunkedUploader.getUploadId(upload.file, { ...upload.options, filename: upload.file.name });
+        const currentIndex = getIndexById(id);
+        const upload = uploads[currentIndex];
+        if (!upload || (upload.status !== "pending" && upload.status !== "error" && upload.status !== "queued")) {
+            return;
+        }
+
+        const controllerUploadId = ChunkedUploader.getUploadId(upload.file, {
+            ...upload.options,
+            filename: upload.file.name,
+        });
 
         setUploads(prev =>
-            prev.map((item, index) =>
-                index === uploadIndex
-                    ? { ...item, progress: 0, status: "uploading", uploadId, error: undefined }
+            prev.map(item =>
+                item.id === id
+                    ? { ...item, progress: 0, status: "uploading", uploadId: controllerUploadId, error: undefined }
                     : item,
             ),
         );
 
         try {
+            if (sessionId !== uploadSessionRef.current) {
+                ChunkedUploader.cancelUpload(controllerUploadId);
+                return;
+            }
+
             const result = await ChunkedUploader.uploadFile(
                 upload.file,
                 { ...upload.options, filename: upload.file.name },
                 (progress: number) => {
-                    setUploads(prev =>
-                        prev.map((item, index) => (index === uploadIndex ? { ...item, progress } : item)),
-                    );
+                    if (sessionId !== uploadSessionRef.current) {
+                        return;
+                    }
+                    setUploads(prev => prev.map(item => (item.id === id ? { ...item, progress } : item)));
                 },
                 () => {
+                    if (sessionId !== uploadSessionRef.current) {
+                        return;
+                    }
                     setUploads(prev =>
-                        prev.map((item, index) =>
-                            index === uploadIndex ? { ...item, progress: 100, status: "processing" } : item,
-                        ),
+                        prev.map(item => (item.id === id ? { ...item, progress: 100, status: "processing" } : item)),
                     );
                 },
-                uploadId,
+                controllerUploadId,
             );
 
+            if (sessionId !== uploadSessionRef.current) {
+                ChunkedUploader.cancelUpload(controllerUploadId);
+                return;
+            }
+
             setUploads(prev =>
-                prev.map((item, index) =>
-                    index === uploadIndex ? { ...item, result, status: "completed", uploadId: undefined } : item,
+                prev.map(item =>
+                    item.id === id ? { ...item, result, status: "completed", uploadId: undefined } : item,
                 ),
             );
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Upload failed";
+            if (sessionId !== uploadSessionRef.current) {
+                return;
+            }
             setUploads(prev =>
-                prev.map((item, index) =>
-                    index === uploadIndex
-                        ? { ...item, error: errorMessage, status: "error", uploadId: undefined }
-                        : item,
+                prev.map(item =>
+                    item.id === id ? { ...item, error: errorMessage, status: "error", uploadId: undefined } : item,
                 ),
             );
         }
     };
 
-    const resetToPending = (uploadIndex: number) => {
+    const resetToPending = (id: string) => {
         setUploads(prev =>
-            prev.map((item, index) =>
-                index === uploadIndex ? { ...item, error: undefined, status: "pending" } : item,
-            ),
+            prev.map(item => (item.id === id ? { ...item, error: undefined, status: "pending" } : item)),
         );
     };
 
-    const updateUploadOptions = (uploadIndex: number, options: Partial<FileUpload>) => {
+    const updateUploadOptions = (id: string, options: Partial<FileUpload>) => {
         setUploads(prev =>
-            prev.map((item, index) =>
-                index === uploadIndex ? { ...item, options: { ...item.options, ...options } } : item,
-            ),
+            prev.map(item => (item.id === id ? { ...item, options: { ...item.options, ...options } } : item)),
         );
     };
 
-    const toggleOptions = (uploadIndex: number) => {
-        setUploads(prev =>
-            prev.map((item, index) => (index === uploadIndex ? { ...item, showOptions: !item.showOptions } : item)),
-        );
+    const toggleOptions = (id: string) => {
+        setUploads(prev => prev.map(item => (item.id === id ? { ...item, showOptions: !item.showOptions } : item)));
     };
 
     const uploadAll = async () => {
-        const pendingUploads = uploads
-            .map((upload, index) => ({ index, upload }))
-            .filter(({ upload }) => upload.status === "pending");
+        const session = ++uploadSessionRef.current;
 
-        for (const { index } of pendingUploads) {
-            await uploadFile(index);
+        const pendingIds = uploads.filter(u => u.status === "pending").map(u => u.id);
+        if (pendingIds.length === 0) {
+            return;
         }
+
+        const queuedIds = new Set(pendingIds.slice(MAX_CONCURRENT_UPLOADS));
+        if (queuedIds.size > 0) {
+            setUploads(prev =>
+                prev.map(item => (queuedIds.has(item.id) ? { ...item, status: "queued" as const, progress: 0 } : item)),
+            );
+        }
+
+        let nextIndex = 0;
+
+        const worker = async () => {
+            while (session === uploadSessionRef.current) {
+                const current = nextIndex++;
+                if (current >= pendingIds.length) {
+                    return;
+                }
+                const id = pendingIds[current];
+                try {
+                    await uploadFile(id, session);
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                }
+            }
+        };
+
+        const poolSize = Math.min(MAX_CONCURRENT_UPLOADS, pendingIds.length);
+        const workers = Array.from({ length: poolSize }, () => worker());
+
+        await Promise.allSettled(workers);
+
+        setUploads(prev =>
+            prev.map(item => (item.status === "queued" ? { ...item, status: "pending" as const } : item)),
+        );
     };
 
     const handleDragEnter = (e: DragEvent) => {
@@ -248,28 +339,30 @@ export default function Home(): ReactElement {
     };
 
     const clearUploads = () => {
+        uploadSessionRef.current++;
+
+        uploads.forEach(upload => {
+            if (upload.uploadId && (upload.status === "uploading" || upload.status === "processing")) {
+                ChunkedUploader.cancelUpload(upload.uploadId);
+            }
+        });
+
         setUploads([]);
     };
 
-    const removeUpload = (index: number) => {
-        const upload = uploads[index];
+    const removeUpload = (id: string) => {
+        const upload = uploads.find(u => u.id === id);
 
         if (upload && upload.uploadId && (upload.status === "uploading" || upload.status === "processing")) {
-            console.log("Cancelling upload with ID:", upload.uploadId);
             ChunkedUploader.cancelUpload(upload.uploadId);
         }
 
-        setUploads(prev => prev.filter((_, i) => i !== index));
+        setUploads(prev => prev.filter(item => item.id !== id));
     };
 
     return (
         <div className={styles.container}>
-            <ParticleBackground
-                isDragging={isDragging}
-                isUploading={isUploading}
-                theme={currentTheme}
-                intensity="medium"
-            />
+            <ParticleBackground isDragging={isDragging} isUploading={isUploading} intensity="medium" />
 
             <NotificationContainer notifications={notifications} onRemove={removeNotification} />
 
@@ -297,7 +390,6 @@ export default function Home(): ReactElement {
             <AdvancedDropZone
                 isDragging={isDragging}
                 maxFileSize={maxFileSize}
-                theme={currentTheme}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
@@ -305,12 +397,9 @@ export default function Home(): ReactElement {
                 onFileSelect={handleFileSelect}
             />
             {!isDragging && !isUploading && (
-                <ClipboardIndicator
-                    clipboardContent={clipboardContent}
-                    onPaste={pasteFromClipboard}
-                    theme={currentTheme}
-                />
+                <ClipboardIndicator clipboardContent={clipboardContent} onPaste={pasteFromClipboard} />
             )}
+
             <UploadQueue
                 onClearAll={clearUploads}
                 onRemove={removeUpload}

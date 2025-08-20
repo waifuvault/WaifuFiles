@@ -22,14 +22,12 @@ interface Particle {
 interface ParticleBackgroundProps {
     isDragging?: boolean;
     isUploading?: boolean;
-    theme?: ThemeType;
     intensity?: "low" | "medium" | "high";
 }
 
 export default function ParticleBackground({
     isDragging = false,
     isUploading = false,
-    theme = ThemeType.DEFAULT,
     intensity = "medium",
 }: ParticleBackgroundProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,6 +35,7 @@ export default function ParticleBackground({
     const particlesRef = useRef<Particle[]>([]);
     const mouseRef = useRef({ x: 0, y: 0 });
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const { currentTheme: theme } = useTheme();
 
     const { particlesEnabled } = useTheme();
 

@@ -2,18 +2,16 @@ import React from "react";
 import styles from "./ClipboardIndicator.module.css";
 import { ClipboardContent } from "@/app/hooks/useClipboard";
 import { isTerminal, ThemeType } from "@/app/constants/theme";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 interface ClipboardIndicatorProps {
     clipboardContent: ClipboardContent;
     onPaste: () => void;
-    theme?: ThemeType;
 }
 
-export default function ClipboardIndicator({
-    clipboardContent,
-    onPaste,
-    theme = ThemeType.DEFAULT,
-}: ClipboardIndicatorProps) {
+export default function ClipboardIndicator({ clipboardContent, onPaste }: ClipboardIndicatorProps) {
+    const { currentTheme: theme, getThemeClass } = useTheme();
+
     if (!clipboardContent.hasContent) {
         return null;
     }
@@ -49,7 +47,7 @@ export default function ClipboardIndicator({
         return isMac ? "⌘V" : "Ctrl+V";
     };
 
-    const themeClass = theme ? `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}` : "";
+    const themeClass = getThemeClass();
 
     return (
         <div className={`${styles.clipboardIndicator} ${styles[themeClass]}`}>

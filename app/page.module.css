@@ -1183,3 +1183,212 @@
         width: 100%;
     }
 }
+
+/* Add these styles to your page.module.css file */
+
+.errorSimple {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.errorInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--error-color);
+    font-weight: 500;
+}
+
+.errorInfo i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.errorLabel {
+    font-size: 0.9rem;
+}
+
+.errorActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.errorDetailsBtn {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.errorDetailsBtn:hover {
+    background: var(--error-color);
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.retryBtn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.retryBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-secondary);
+}
+
+.retryBtn i {
+    font-size: 0.85rem;
+}
+
+.backToOptionsBtn {
+    background: rgba(102, 126, 234, 0.8);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.backToOptionsBtn:hover {
+    background: rgba(102, 126, 234, 1);
+    transform: translateY(-1px);
+}
+
+.backToOptionsBtn i {
+    font-size: 0.85rem;
+}
+
+/* Error Dialog Content */
+.errorDialog {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.errorDialogIcon {
+    color: var(--error-color);
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.errorDialogContent {
+    flex: 1;
+}
+
+.errorDialogContent h4 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.errorDialogContent p {
+    margin: 0 0 1rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.errorDialogMessage {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-family: "Monaco", "Consolas", monospace;
+    font-size: 0.85rem;
+    color: var(--error-color);
+    word-break: break-word;
+    white-space: pre-wrap;
+    line-height: 1.4;
+}
+
+.errorDialogActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.resetBtn {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.resetBtn:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+.resetBtn i {
+    font-size: 0.85rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .errorActions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .errorDetailsBtn,
+    .retryBtn,
+    .backToOptionsBtn {
+        flex: 1;
+        justify-content: center;
+        min-width: 80px;
+    }
+
+    .errorDialog {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .errorDialogIcon {
+        align-self: center;
+    }
+
+    .errorDialogActions {
+        justify-content: center;
+    }
+
+    .errorDialogActions button {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+}
