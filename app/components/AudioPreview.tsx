@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styles from "@/app/components/Enhanced3DFilePreview.module.css";
 import { ThemeType } from "@/app/constants/theme";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
-export function AudioPreview({ theme }: { theme?: ThemeType }) {
+export function AudioPreview() {
     const [waveformData, setWaveformData] = useState<number[]>([]);
+    const { currentTheme: theme } = useTheme();
 
     useEffect(() => {
         const generateWaveform = () => {

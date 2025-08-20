@@ -3,6 +3,7 @@ import styles from "./AdvancedDropZone.module.css";
 import { formatFileSize } from "../utils/upload";
 import Enhanced3DFilePreview from "./Enhanced3DFilePreview";
 import { isTerminal, ThemeType } from "@/app/constants/theme";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 let rippleCounter = 0;
 let fileCounter = 0;
@@ -10,7 +11,6 @@ let fileCounter = 0;
 interface AdvancedDropZoneProps {
     isDragging: boolean;
     maxFileSize: number;
-    theme?: ThemeType;
     onDragEnter: (e: DragEvent) => void;
     onDragLeave: (e: DragEvent) => void;
     onDragOver: (e: DragEvent) => void;
@@ -28,7 +28,6 @@ interface DraggedFile {
 export default function AdvancedDropZone({
     isDragging,
     maxFileSize,
-    theme = ThemeType.DEFAULT,
     onDragEnter,
     onDragLeave,
     onDragOver,
@@ -42,6 +41,7 @@ export default function AdvancedDropZone({
     const [ripples, setRipples] = useState<Array<{ id: string; x: number; y: number }>>([]);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
+    const { currentTheme: theme } = useTheme();
 
     const validateFile = (file: File): { isValid: boolean; error?: string } => {
         if (file.size > maxFileSize) {
@@ -244,12 +244,7 @@ export default function AdvancedDropZone({
                                     !draggedFile.isValid ? styles.dragPreviewError : ""
                                 }`}
                             >
-                                <Enhanced3DFilePreview
-                                    file={draggedFile.file}
-                                    size="small"
-                                    interactive={false}
-                                    theme={theme}
-                                />
+                                <Enhanced3DFilePreview file={draggedFile.file} size="small" interactive={false} />
                                 <span className={styles.dragPreviewName}>
                                     {draggedFile.file.name.length > 15
                                         ? `${draggedFile.file.name.slice(0, 12)}...`

@@ -2,14 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./Enhanced3DFilePreview.module.css";
 import { FilePreview as FilePreviewType, generateFilePreview, getFileIcon } from "../utils/filePreview";
 import { AudioPreview } from "@/app/components/AudioPreview";
-import { ThemeType } from "@/app/constants/theme";
+import { useTheme } from "@/app/contexts/ThemeContext";
 
 interface Enhanced3DFilePreviewProps {
     file: File;
     size?: "large" | "medium" | "small";
     interactive?: boolean;
     showMetadata?: boolean;
-    theme?: ThemeType;
 }
 
 interface FileMetadata {
@@ -25,7 +24,6 @@ export default function Enhanced3DFilePreview({
     size = "medium",
     interactive = true,
     showMetadata = false,
-    theme = ThemeType.DEFAULT,
 }: Enhanced3DFilePreviewProps) {
     const [preview, setPreview] = useState<FilePreviewType | null>(null);
     const [metadata, setMetadata] = useState<FileMetadata>({});
@@ -34,6 +32,7 @@ export default function Enhanced3DFilePreview({
 
     const containerRef = useRef<HTMLDivElement>(null);
     const animationRef = useRef<number>(null);
+    const { getThemeClass } = useTheme();
 
     useEffect(() => {
         let mounted = true;
@@ -195,7 +194,7 @@ export default function Enhanced3DFilePreview({
     };
 
     const sizeClass = `filePreview${size.charAt(0).toUpperCase() + size.slice(1)}`;
-    const themeClass = theme ? `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}` : "";
+    const themeClass = getThemeClass();
 
     if (isLoading) {
         return (
@@ -224,7 +223,7 @@ export default function Enhanced3DFilePreview({
     const renderPreviewContent = () => {
         switch (preview.type) {
             case "audio":
-                return <AudioPreview theme={theme} />;
+                return <AudioPreview />;
 
             case "image":
                 return preview.url ? (

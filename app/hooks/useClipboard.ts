@@ -179,7 +179,6 @@ export function useClipboard({ onFilesDetected, onUrlDetected, enabled = true }:
             }
         };
 
-        // Listen for paste events
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "v") {
                 if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
