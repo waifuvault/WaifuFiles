@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import styles from "./Enhanced3DFilePreview.module.css";
+import styles from "./VisualFilePreview.module.css";
 import { FilePreview as FilePreviewType, generateFilePreview, getFileIcon } from "../utils/filePreview";
 import { AudioPreview } from "@/app/components/AudioPreview";
 import { useTheme } from "@/app/contexts/ThemeContext";
 
-interface Enhanced3DFilePreviewProps {
+interface Visual3DFilePreviewProps {
     file: File;
     size?: "large" | "medium" | "small";
     interactive?: boolean;
@@ -19,12 +19,12 @@ interface FileMetadata {
     encoding?: string;
 }
 
-export default function Enhanced3DFilePreview({
+export default function Visual3DFilePreview({
     file,
     size = "medium",
     interactive = true,
     showMetadata = false,
-}: Enhanced3DFilePreviewProps) {
+}: Visual3DFilePreviewProps) {
     const [preview, setPreview] = useState<FilePreviewType | null>(null);
     const [metadata, setMetadata] = useState<FileMetadata>({});
     const [isLoading, setIsLoading] = useState(true);

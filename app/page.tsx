@@ -4,7 +4,7 @@ import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useRef, useStat
 import styles from "./page.module.css";
 import { FileUpload } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
-import { formatFileSize } from "./utils/upload";
+import { formatFileSize, validateUploadOptions } from "./utils/upload";
 import UploadQueue from "./components/UploadQueue";
 import ThemeSelector from "@/app/components/ThemeSelector";
 import { ChunkedUploader } from "@/app/utils/chunkedUpload";
@@ -181,6 +181,29 @@ export default function Home(): ReactElement {
             return;
         }
 
+        const validation = validateUploadOptions(upload.options);
+        if (!validation.isValid) {
+            setUploads(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? {
+                              ...item,
+                              error: `Validation failed: ${validation.errors.join(", ")}`,
+                              status: "error",
+                          }
+                        : item,
+                ),
+            );
+
+            addNotification({
+                type: "error",
+                title: "Upload validation failed",
+                message: validation.errors.join(", "),
+                duration: 5000,
+            });
+            return;
+        }
+
         const controllerUploadId = ChunkedUploader.getUploadId(upload.file, {
             ...upload.options,
             filename: upload.file.name,
@@ -261,6 +284,42 @@ export default function Home(): ReactElement {
 
     const uploadAll = async () => {
         const session = ++uploadSessionRef.current;
+
+        const pendingUploads = uploads.filter(u => u.status === "pending");
+
+        const invalidUploads = pendingUploads.filter(upload => {
+            const validation = validateUploadOptions(upload.options);
+            return !validation.isValid;
+        });
+
+        if (invalidUploads.length > 0) {
+            setUploads(prev =>
+                prev.map(item => {
+                    const validation = validateUploadOptions(item.options);
+                    if (!validation.isValid && item.status === "pending") {
+                        return {
+                            ...item,
+                            error: `Validation failed: ${validation.errors.join(", ")}`,
+                            status: "error" as const,
+                        };
+                    }
+                    return item;
+                }),
+            );
+            addNotification({
+                type: "error",
+                title: "Some uploads have validation errors",
+                message: `${invalidUploads.length} file(s) have invalid options. Please fix them before uploading.`,
+                duration: 7000,
+            });
+            const validIds = pendingUploads
+                .filter(upload => validateUploadOptions(upload.options).isValid)
+                .map(u => u.id);
+
+            if (validIds.length === 0) {
+                return;
+            }
+        }
 
         const pendingIds = uploads.filter(u => u.status === "pending").map(u => u.id);
         if (pendingIds.length === 0) {
