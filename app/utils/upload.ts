@@ -1,3 +1,5 @@
+import type { FileUpload } from "waifuvault-node-api";
+
 export const formatFileSize = (bytes: number): string => {
     if (bytes === 0) {
         return "0 B";
@@ -18,4 +20,16 @@ export const copyToClipboard = async (text: string): Promise<void> => {
     } catch (err) {
         console.error("Failed to copy:", err);
     }
+};
+
+export const validateUploadOptions = (options: Partial<FileUpload>): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    if (options.expires && !validateExpires(options.expires)) {
+        errors.push("Invalid expires format. Use format like '1h', '30m', or '2d'");
+    }
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
 };

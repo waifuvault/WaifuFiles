@@ -1392,3 +1392,142 @@
         min-width: 120px;
     }
 }
+
+.validationErrors {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--error-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.validationError {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.validationError:last-child {
+    margin-bottom: 0;
+}
+
+.validationError i {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Input Error State */
+.optionInputError {
+    border-color: var(--error-color) !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+    background: rgba(220, 53, 69, 0.05) !important;
+}
+
+/* Disabled Upload Button */
+.uploadBtnDisabled {
+    background: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    pointer-events: none !important;
+}
+
+.uploadBtnDisabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Validation tooltip */
+.uploadBtn[disabled] {
+    position: relative;
+}
+
+.uploadBtn[disabled]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 0.25rem;
+}
+
+.uploadBtn[disabled]:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.uploadItem.validationError {
+    border-color: var(--error-color);
+    background: rgba(220, 53, 69, 0.05);
+}
+
+/* Theme-specific validation error styles */
+[data-theme="cyberpunk"] .validationError {
+    color: #ff0040;
+}
+
+[data-theme="cyberpunk"] .validationErrors {
+    background: rgba(255, 0, 64, 0.1);
+    border-color: #ff0040;
+    box-shadow: 0 0 10px rgba(255, 0, 64, 0.3);
+}
+
+[data-theme="cyberpunk"] .optionInputError {
+    border-color: #ff0040 !important;
+    box-shadow: 0 0 0 2px rgba(255, 0, 64, 0.2) !important;
+    background: rgba(255, 0, 64, 0.05) !important;
+}
+
+[data-theme="terminal"] .validationErrors,
+[data-theme="orangeterminal"] .validationErrors {
+    font-family: "Courier New", monospace;
+}
+
+[data-theme="minimal"] .validationErrors {
+    background: rgba(220, 53, 69, 0.08);
+    border-color: #dc3545;
+}
+
+/* Responsive validation styles */
+@media (max-width: 768px) {
+    .validationErrors {
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .validationError {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .uploadBtn[disabled]:hover::after {
+        position: fixed;
+        bottom: 2rem;
+        left: 1rem;
+        right: 1rem;
+        transform: none;
+        text-align: center;
+        white-space: normal;
+        max-width: none;
+    }
+
+    .uploadBtn[disabled]:hover::before {
+        display: none;
+    }
+}

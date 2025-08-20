@@ -28,6 +28,16 @@ export async function POST(req: NextRequest) {
     try {
         const { uploadId: reqUploadId, options }: FinalizeUploadRequest = await req.json();
         uploadId = reqUploadId;
+
+        if (options.expires && !/^$|^\d+[mhd]$/.test(options.expires)) {
+            return NextResponse.json(
+                {
+                    error: "Invalid expires format. Use format like '1h', '30m', or '2d'",
+                },
+                { status: 400 },
+            );
+        }
+
         const tempDir = join(process.cwd(), "tmp", uploadId);
 
         try {
@@ -70,8 +80,27 @@ export async function POST(req: NextRequest) {
             bucketToken,
             file: finalBuffer,
             filename,
-            ...restOptions,
         };
+
+        if (restOptions.expires && restOptions.expires.trim() !== "") {
+            uploadOptions.expires = restOptions.expires;
+        }
+
+        if (restOptions.hideFilename === true) {
+            uploadOptions.hideFilename = true;
+        }
+
+        if (restOptions.password && restOptions.password.trim() !== "") {
+            uploadOptions.password = restOptions.password;
+        }
+
+        if (restOptions.oneTimeDownload === true) {
+            uploadOptions.oneTimeDownload = true;
+        }
+
+        if (restOptions.bucketToken && restOptions.bucketToken.trim() !== "") {
+            uploadOptions.bucketToken = restOptions.bucketToken;
+        }
 
         log.debug(`Starting WaifuVault upload for ${filename} (${Math.round(finalBuffer.length / 1024 / 1024)}MB)`);
 

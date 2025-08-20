@@ -1,7 +1,7 @@
 import React from "react";
 import { FileUpload } from "waifuvault-node-api";
 import styles from "../page.module.css";
-import { validateExpires } from "../utils/upload";
+import { validateExpires, validateUploadOptions } from "../utils/upload";
 
 interface OptionsPanelProps {
     onOptionsChange: (options: Partial<FileUpload>) => void;
@@ -10,12 +10,14 @@ interface OptionsPanelProps {
 
 export default function OptionsPanel({ onOptionsChange, options }: OptionsPanelProps) {
     const updateOption = <K extends keyof FileUpload>(key: K, value: FileUpload[K]) => {
-        onOptionsChange({ ...options, [key]: value });
+        const newOptions = { ...options, [key]: value };
+        onOptionsChange(newOptions);
     };
 
     const handleExpiresChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
         updateOption("expires", value);
+
         if (value === "" || validateExpires(value)) {
             e.target.setCustomValidity("");
         } else {
@@ -23,9 +25,23 @@ export default function OptionsPanel({ onOptionsChange, options }: OptionsPanelP
         }
     };
 
+    const validation = validateUploadOptions(options);
+    const hasErrors = !validation.isValid;
+
     return (
         <div className={styles.optionsPanel}>
             <h4>Upload Options</h4>
+
+            {hasErrors && (
+                <div className={styles.validationErrors}>
+                    {validation.errors.map((error, index) => (
+                        <div key={index} className={styles.validationError}>
+                            <i className="bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                            {error}
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <div className={styles.optionRow}>
                 <label>
@@ -69,7 +85,9 @@ export default function OptionsPanel({ onOptionsChange, options }: OptionsPanelP
             <div className={styles.optionRow}>
                 <label>Expires (e.g., 1h, 30m, 2d):</label>
                 <input
-                    className={styles.optionInput}
+                    className={`${styles.optionInput} ${
+                        options.expires && !validateExpires(options.expires) ? styles.optionInputError : ""
+                    }`}
                     onChange={handleExpiresChange}
                     pattern="^$|^\d+[mhd]$"
                     placeholder="Optional expiry (1h, 30m, 2d)"

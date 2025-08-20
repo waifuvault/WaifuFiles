@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "@/app/components/Enhanced3DFilePreview.module.css";
+import styles from "@/app/components/VisualFilePreview.module.css";
 import { ThemeType } from "@/app/constants/theme";
 import { useTheme } from "@/app/contexts/ThemeContext";
 

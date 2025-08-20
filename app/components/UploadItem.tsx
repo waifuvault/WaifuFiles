@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FileUpload } from "waifuvault-node-api";
 import styles from "../page.module.css";
-import { copyToClipboard, formatFileSize } from "../utils/upload";
+import { copyToClipboard, formatFileSize, validateUploadOptions } from "../utils/upload";
 import OptionsPanel from "./OptionsPanel";
-import Enhanced3DFilePreview from "./Enhanced3DFilePreview";
+import Visual3DFilePreview from "./Visual3DFilePreview";
 import QRCodeGenerator from "./QRCodeGenerator";
 import Dialog from "./Dialog";
 import { UploadItem as UploadItemType } from "../types/upload";
@@ -75,7 +75,7 @@ export default function UploadItem({
                 }`}
             >
                 <div className={styles.uploadItemHeader}>
-                    <Enhanced3DFilePreview
+                    <Visual3DFilePreview
                         file={upload.file}
                         size="medium"
                         interactive={true}
@@ -101,10 +101,23 @@ export default function UploadItem({
                                     <i aria-hidden="true" className="bi bi-gear"></i>
                                 </button>
                                 <button
-                                    className={styles.uploadBtn}
+                                    className={`${styles.uploadBtn} ${
+                                        !validateUploadOptions(upload.options).isValid ? styles.uploadBtnDisabled : ""
+                                    }`}
+                                    disabled={!validateUploadOptions(upload.options).isValid}
                                     onClick={() => {
+                                        const validation = validateUploadOptions(upload.options);
+                                        if (!validation.isValid) {
+                                            console.error("Upload validation failed:", validation.errors);
+                                            return;
+                                        }
                                         onUpload(upload.id);
                                     }}
+                                    title={
+                                        !validateUploadOptions(upload.options).isValid
+                                            ? "Fix validation errors before uploading"
+                                            : "Upload file"
+                                    }
                                 >
                                     Upload
                                 </button>

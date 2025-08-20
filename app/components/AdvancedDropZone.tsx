@@ -1,7 +1,7 @@
 import React, { DragEvent, useRef, useState } from "react";
 import styles from "./AdvancedDropZone.module.css";
 import { formatFileSize } from "../utils/upload";
-import Enhanced3DFilePreview from "./Enhanced3DFilePreview";
+import Visual3DFilePreview from "./Visual3DFilePreview";
 import { isTerminal, ThemeType } from "@/app/constants/theme";
 import { useTheme } from "@/app/contexts/ThemeContext";
 
@@ -244,7 +244,7 @@ export default function AdvancedDropZone({
                                     !draggedFile.isValid ? styles.dragPreviewError : ""
                                 }`}
                             >
-                                <Enhanced3DFilePreview file={draggedFile.file} size="small" interactive={false} />
+                                <Visual3DFilePreview file={draggedFile.file} size="small" interactive={false} />
                                 <span className={styles.dragPreviewName}>
                                     {draggedFile.file.name.length > 15
                                         ? `${draggedFile.file.name.slice(0, 12)}...`
