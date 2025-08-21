@@ -3,6 +3,7 @@ export enum ThemeType {
     CYBERPUNK = "cyberpunk",
     GREEN_PHOSPHOR = "terminal",
     ORANGE_PHOSPHOR = "orangeterminal",
+    STEAMPUNK = "steampunk",
     MINIMAL = "minimal",
     DEFAULT = ANIME,
 }

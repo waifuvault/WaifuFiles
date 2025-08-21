@@ -159,6 +159,8 @@ export default function AdvancedDropZone({
 
     const getThemeIcon = () => {
         switch (theme) {
+            case ThemeType.STEAMPUNK:
+                return "bi-gear";
             case ThemeType.CYBERPUNK:
                 return "bi-upload";
             case ThemeType.GREEN_PHOSPHOR:
@@ -174,6 +176,8 @@ export default function AdvancedDropZone({
 
     const getThemeMessage = () => {
         switch (theme) {
+            case ThemeType.STEAMPUNK:
+                return "Steam-Powered File Conveyance";
             case ThemeType.CYBERPUNK:
                 return "UPLOAD.EXE INITIALIZED";
             case ThemeType.GREEN_PHOSPHOR:
@@ -215,7 +219,10 @@ export default function AdvancedDropZone({
                     <div className={styles.progressBar}>
                         <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }}></div>
                     </div>
-                    <span className={styles.processingText}>Processing files... {Math.round(uploadProgress)}%</span>
+                    <span className={styles.processingText}>
+                        {theme === ThemeType.STEAMPUNK ? "Engaging steam engines..." : "Processing files..."}{" "}
+                        {Math.round(uploadProgress)}%
+                    </span>
                 </div>
             )}
 
@@ -262,7 +269,11 @@ export default function AdvancedDropZone({
 
                     <p className={styles.dropInstruction}>
                         {draggedFiles.some(f => f.isValid) ? (
-                            <span className={styles.dropInstructionValid}>Drop to upload files</span>
+                            <span className={styles.dropInstructionValid}>
+                                {theme === ThemeType.STEAMPUNK
+                                    ? "Release to activate steam conveyance"
+                                    : "Drop to upload files"}
+                            </span>
                         ) : (
                             <span className={styles.dropInstructionError}>Cannot upload these files</span>
                         )}
@@ -279,6 +290,13 @@ export default function AdvancedDropZone({
                                 <div className={styles.sparkle}></div>
                             </div>
                         )}
+                        {theme === ThemeType.STEAMPUNK && (
+                            <div className={styles.steamPuffs}>
+                                <div className={styles.steamPuff}></div>
+                                <div className={styles.steamPuff}></div>
+                                <div className={styles.steamPuff}></div>
+                            </div>
+                        )}
                     </div>
 
                     <div className={styles.dropzoneText}>
@@ -287,7 +305,11 @@ export default function AdvancedDropZone({
                             Multiple files supported • Max {formatFileSize(maxFileSize)} per file
                         </span>
                         <span className={styles.permanentHint}>
-                            <strong>Permanent storage - files never expire</strong>
+                            <strong>
+                                {theme === ThemeType.STEAMPUNK
+                                    ? "Copper-grade storage - files preserved indefinitely"
+                                    : "Permanent storage - files never expire"}
+                            </strong>
                         </span>
                     </div>
 
@@ -313,6 +335,20 @@ export default function AdvancedDropZone({
                                     }}
                                 ></div>
                             ))}
+                        </div>
+                    )}
+
+                    {theme === ThemeType.STEAMPUNK && (
+                        <div className={styles.steampunkDecorations}>
+                            <div className={styles.steamPipes}>
+                                <div className={styles.steamPipeHorizontal}></div>
+                                <div className={styles.steamPipeVertical}></div>
+                            </div>
+                            <div className={styles.pressureGauges}>
+                                <div className={styles.pressureGauge}>
+                                    <div className={styles.gaugeNeedle}></div>
+                                </div>
+                            </div>
                         </div>
                     )}
 

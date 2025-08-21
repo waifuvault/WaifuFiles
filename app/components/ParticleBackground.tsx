@@ -13,10 +13,11 @@ interface Particle {
     size: number;
     opacity: number;
     color: string;
-    type: "dot" | "star" | "code" | "upload";
+    type: "dot" | "star" | "code" | "upload" | "gear" | "steam";
     angle: number;
     life: number;
     maxLife: number;
+    rotationSpeed?: number;
 }
 
 interface ParticleBackgroundProps {
@@ -41,6 +42,13 @@ export default function ParticleBackground({
 
     const getThemeConfig = (currentTheme: ThemeType) => {
         switch (currentTheme) {
+            case ThemeType.STEAMPUNK:
+                return {
+                    colors: ["#cd7f32", "#daa520", "#b8860b", "#d2691e"],
+                    particleTypes: ["gear", "steam", "dot"],
+                    glowEffect: true,
+                    speed: 0.8,
+                };
             case ThemeType.CYBERPUNK:
                 return {
                     colors: ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"],
@@ -101,9 +109,9 @@ export default function ParticleBackground({
             }
 
             const colors = config.colors;
-            const types = config.particleTypes as Array<"dot" | "star" | "code" | "upload">;
+            const types = config.particleTypes as Array<"dot" | "star" | "code" | "upload" | "gear" | "steam">;
 
-            return {
+            const particle: Particle = {
                 x: x ?? Math.random() * canvas.width,
                 y: y ?? Math.random() * canvas.height,
                 vx: (Math.random() - 0.5) * config.speed,
@@ -116,6 +124,22 @@ export default function ParticleBackground({
                 life: 0,
                 maxLife: Math.random() * 1000 + 500,
             };
+
+            // Add rotation speed for gears
+            if (particle.type === "gear") {
+                particle.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                particle.size = Math.random() * 4 + 2; // Bigger gears
+            }
+
+            // Steam particles rise slowly
+            if (particle.type === "steam") {
+                particle.vy = -(Math.random() * 0.5 + 0.2); // Always rising
+                particle.vx = (Math.random() - 0.5) * 0.3; // Gentle horizontal drift
+                particle.size = Math.random() * 6 + 3; // Bigger steam particles
+                particle.opacity = Math.random() * 0.4 + 0.1; // More transparent
+            }
+
+            return particle;
         },
         [config.colors, config.particleTypes, config.speed],
     );
@@ -134,6 +158,71 @@ export default function ParticleBackground({
             ctx.translate(particle.x, particle.y);
 
             switch (particle.type) {
+                case "gear": {
+                    const gearRadius = particle.size;
+                    const teeth = 8;
+                    const innerRadius = gearRadius * 0.6;
+                    const toothHeight = gearRadius * 0.3;
+
+                    ctx.rotate(particle.angle);
+
+                    // Draw gear teeth
+                    ctx.beginPath();
+                    for (let i = 0; i < teeth; i++) {
+                        const angle = (i * Math.PI * 2) / teeth;
+                        const nextAngle = ((i + 1) * Math.PI * 2) / teeth;
+
+                        // Outer tooth
+                        const x1 = Math.cos(angle) * gearRadius;
+                        const y1 = Math.sin(angle) * gearRadius;
+                        const x2 = Math.cos(angle) * (gearRadius + toothHeight);
+                        const y2 = Math.sin(angle) * (gearRadius + toothHeight);
+                        const x3 = Math.cos(nextAngle) * (gearRadius + toothHeight);
+                        const y3 = Math.sin(nextAngle) * (gearRadius + toothHeight);
+                        const x4 = Math.cos(nextAngle) * gearRadius;
+                        const y4 = Math.sin(nextAngle) * gearRadius;
+
+                        if (i === 0) {
+                            ctx.moveTo(x1, y1);
+                        }
+                        ctx.lineTo(x2, y2);
+                        ctx.lineTo(x3, y3);
+                        ctx.lineTo(x4, y4);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Draw inner circle
+                    ctx.beginPath();
+                    ctx.arc(0, 0, innerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Draw center hole
+                    ctx.globalCompositeOperation = "destination-out";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, innerRadius * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalCompositeOperation = "source-over";
+                    break;
+                }
+
+                case "steam": {
+                    // Draw steam cloud as multiple overlapping circles
+                    const cloudSize = particle.size;
+                    const numClouds = 3;
+
+                    for (let i = 0; i < numClouds; i++) {
+                        const offsetX = (Math.random() - 0.5) * cloudSize * 0.5;
+                        const offsetY = (Math.random() - 0.5) * cloudSize * 0.5;
+                        const radius = cloudSize * (0.3 + Math.random() * 0.4);
+
+                        ctx.beginPath();
+                        ctx.arc(offsetX, offsetY, radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                }
+
                 case "star":
                     ctx.rotate(particle.angle);
                     ctx.beginPath();
@@ -193,7 +282,20 @@ export default function ParticleBackground({
             particle.life += deltaTime;
             particle.x += particle.vx;
             particle.y += particle.vy;
-            particle.angle += 0.02;
+
+            // Update rotation for gears
+            if (particle.type === "gear" && particle.rotationSpeed) {
+                particle.angle += particle.rotationSpeed;
+            } else {
+                particle.angle += 0.02;
+            }
+
+            // Steam particles fade as they rise
+            if (particle.type === "steam") {
+                particle.opacity = Math.max(0, particle.opacity - 0.002);
+                // Add slight expansion
+                particle.size += 0.01;
+            }
 
             if (isDragging) {
                 const dx = mouseRef.current.x - particle.x;
@@ -212,23 +314,22 @@ export default function ParticleBackground({
                 particle.opacity = Math.max(0, particle.opacity - 0.005);
             }
 
+            // Wrap around screen edges
             if (particle.x < 0) {
                 particle.x = canvas.width;
             }
-
             if (particle.x > canvas.width) {
                 particle.x = 0;
             }
-
             if (particle.y < 0) {
                 particle.y = canvas.height;
             }
-
             if (particle.y > canvas.height) {
                 particle.y = 0;
             }
 
-            if (particle.life > particle.maxLife) {
+            // Reset particle if it's too old or too faded
+            if (particle.life > particle.maxLife || particle.opacity <= 0) {
                 Object.assign(particle, createParticle());
             }
         },
@@ -254,6 +355,7 @@ export default function ParticleBackground({
             particlesRef.current.pop();
         }
 
+        // Draw connections for cyberpunk theme
         if (theme === ThemeType.CYBERPUNK) {
             ctx.strokeStyle = config.colors[0];
             ctx.globalAlpha = 0.1;
@@ -269,6 +371,31 @@ export default function ParticleBackground({
 
                     if (distance < 100) {
                         ctx.globalAlpha = ((100 - distance) / 100) * 0.2;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        if (theme === ThemeType.STEAMPUNK) {
+            ctx.strokeStyle = config.colors[0];
+            ctx.globalAlpha = 0.05;
+            ctx.lineWidth = 2;
+
+            const gears = particlesRef.current.filter(p => p.type === "gear");
+            for (let i = 0; i < gears.length; i++) {
+                for (let j = i + 1; j < gears.length; j++) {
+                    const p1 = gears[i];
+                    const p2 = gears[j];
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.globalAlpha = ((150 - distance) / 150) * 0.1;
                         ctx.beginPath();
                         ctx.moveTo(p1.x, p1.y);
                         ctx.lineTo(p2.x, p2.y);

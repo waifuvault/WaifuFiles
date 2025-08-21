@@ -44,6 +44,13 @@ export const themes: Theme[] = [
         icon: "bi-terminal", // Terminal icon
     },
     {
+        description: "Victorian industrial with brass and gears",
+        icon: "bi-gear", // Gear icon for steampunk
+        id: ThemeType.STEAMPUNK,
+        name: "Steampunk",
+        preview: "⚙️",
+    },
+    {
         description: "Light and simple design",
         icon: "bi-circle", // Clean circle for minimal
         id: ThemeType.MINIMAL,

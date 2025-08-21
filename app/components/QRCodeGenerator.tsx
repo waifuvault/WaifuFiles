@@ -24,6 +24,11 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
     useEffect(() => {
         const getThemeColors = () => {
             switch (theme) {
+                case ThemeType.STEAMPUNK:
+                    return {
+                        foreground: "#cd7f32",
+                        background: "#f4e4bc",
+                    };
                 case ThemeType.CYBERPUNK:
                     return {
                         foreground: "#00ffff",
@@ -47,7 +52,7 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
                 case ThemeType.DEFAULT:
                 default:
                     return {
-                        foreground: "#000000",
+                        foreground: "#667eea",
                         background: "#ffffff",
                     };
             }
@@ -143,7 +148,7 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
             {isGenerating && (
                 <div className={styles.loading}>
                     <div className={styles.spinner}></div>
-                    <span>Generating QR code...</span>
+                    <span>{theme === ThemeType.STEAMPUNK ? "Engraving brass plate..." : "Generating QR code..."}</span>
                 </div>
             )}
 
@@ -158,15 +163,19 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
                 <>
                     <div className={styles.actions}>
                         <button
-                            className={`${styles.actionButton} ${styles.downloadButton} ${downloaded ? styles.downloaded : ""}`}
+                            className={`${styles.actionButton} ${styles.downloadButton} ${downloaded ? styles.downloaded : ""} ${styles[themeClass]}`}
                             onClick={handleDownload}
                         >
                             <i className={downloaded ? "bi-check-circle-fill" : "bi-download"} aria-hidden="true"></i>
-                            {downloaded ? "Downloaded!" : "Download PNG"}
+                            {downloaded
+                                ? "Downloaded!"
+                                : theme === ThemeType.STEAMPUNK
+                                  ? "Save Brass Plate"
+                                  : "Download PNG"}
                         </button>
 
                         <button
-                            className={`${styles.actionButton} ${styles.copyButton} ${copied ? styles.copied : ""}`}
+                            className={`${styles.actionButton} ${styles.copyButton} ${copied ? styles.copied : ""} ${styles[themeClass]}`}
                             onClick={handleCopyToClipboard}
                         >
                             <i className={copied ? "bi-check-circle-fill" : "bi-clipboard"} aria-hidden="true"></i>
@@ -177,7 +186,9 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
                     <div className={styles.info}>
                         <p className={styles.infoText}>
                             <i className="bi-info-circle" aria-hidden="true"></i>
-                            Scan this QR code to access your uploaded file
+                            {theme === ThemeType.STEAMPUNK
+                                ? "Scan this brass-engraved code to access your stored file"
+                                : "Scan this QR code to access your uploaded file"}
                         </p>
                     </div>
                 </>
@@ -194,8 +205,8 @@ export default function QRCodeGenerator({ url, fileName, onClose, embedded = fal
             <div className={`${styles.modal} ${styles[themeClass]}`} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h3 className={styles.title}>
-                        <i className="bi-qr-code" aria-hidden="true"></i>
-                        QR Code
+                        <i className={theme === ThemeType.STEAMPUNK ? "bi-gear" : "bi-qr-code"} aria-hidden="true"></i>
+                        {theme === ThemeType.STEAMPUNK ? "Brass Code Plate" : "QR Code"}
                     </h3>
                     <button className={styles.closeButton} onClick={onClose} aria-label="Close QR code generator">
                         <i className="bi-x-lg" aria-hidden="true"></i>

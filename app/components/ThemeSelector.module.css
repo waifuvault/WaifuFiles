@@ -301,6 +301,38 @@
     background: #ffa500;
 }
 
+.previewsteampunk {
+    background: linear-gradient(135deg, #1a1310 0%, #2d1b14 100%);
+    border: 1px solid #cd7f32;
+    position: relative;
+}
+
+.previewsteampunk::before {
+    content: "⚙";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    color: #daa520;
+    animation: gearSpinPreview 4s linear infinite;
+}
+
+@keyframes gearSpinPreview {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.previewsteampunk .previewHeader,
+.previewsteampunk .previewLine,
+.previewsteampunk .previewButton {
+    background: #cd7f32;
+    box-shadow: 0 0 2px rgba(205, 127, 50, 0.5);
+}
+
 .themeInfo {
     flex: 1;
     min-width: 0;
