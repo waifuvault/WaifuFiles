@@ -84,7 +84,6 @@ export default function ParticleBackground({
 
     const config = getThemeConfig(theme);
 
-    // Particle count based on intensity
     const getParticleCount = useCallback(() => {
         const base = {
             low: 30,
@@ -125,18 +124,16 @@ export default function ParticleBackground({
                 maxLife: Math.random() * 1000 + 500,
             };
 
-            // Add rotation speed for gears
             if (particle.type === "gear") {
                 particle.rotationSpeed = (Math.random() - 0.5) * 0.02;
-                particle.size = Math.random() * 4 + 2; // Bigger gears
+                particle.size = Math.random() * 4 + 2;
             }
 
-            // Steam particles rise slowly
             if (particle.type === "steam") {
-                particle.vy = -(Math.random() * 0.5 + 0.2); // Always rising
-                particle.vx = (Math.random() - 0.5) * 0.3; // Gentle horizontal drift
-                particle.size = Math.random() * 6 + 3; // Bigger steam particles
-                particle.opacity = Math.random() * 0.4 + 0.1; // More transparent
+                particle.vy = -(Math.random() * 0.5 + 0.2);
+                particle.vx = (Math.random() - 0.5) * 0.3;
+                particle.size = Math.random() * 6 + 3;
+                particle.opacity = Math.random() * 0.4 + 0.1;
             }
 
             return particle;
@@ -166,13 +163,11 @@ export default function ParticleBackground({
 
                     ctx.rotate(particle.angle);
 
-                    // Draw gear teeth
                     ctx.beginPath();
                     for (let i = 0; i < teeth; i++) {
                         const angle = (i * Math.PI * 2) / teeth;
                         const nextAngle = ((i + 1) * Math.PI * 2) / teeth;
 
-                        // Outer tooth
                         const x1 = Math.cos(angle) * gearRadius;
                         const y1 = Math.sin(angle) * gearRadius;
                         const x2 = Math.cos(angle) * (gearRadius + toothHeight);
@@ -192,12 +187,10 @@ export default function ParticleBackground({
                     ctx.closePath();
                     ctx.fill();
 
-                    // Draw inner circle
                     ctx.beginPath();
                     ctx.arc(0, 0, innerRadius, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Draw center hole
                     ctx.globalCompositeOperation = "destination-out";
                     ctx.beginPath();
                     ctx.arc(0, 0, innerRadius * 0.3, 0, Math.PI * 2);
@@ -207,7 +200,6 @@ export default function ParticleBackground({
                 }
 
                 case "steam": {
-                    // Draw steam cloud as multiple overlapping circles
                     const cloudSize = particle.size;
                     const numClouds = 3;
 
@@ -260,7 +252,7 @@ export default function ParticleBackground({
                     ctx.fillRect(-particle.size / 4, 0, particle.size / 2, particle.size);
                     break;
 
-                default: // dot
+                default:
                     ctx.beginPath();
                     ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
                     ctx.fill();
@@ -283,17 +275,14 @@ export default function ParticleBackground({
             particle.x += particle.vx;
             particle.y += particle.vy;
 
-            // Update rotation for gears
             if (particle.type === "gear" && particle.rotationSpeed) {
                 particle.angle += particle.rotationSpeed;
             } else {
                 particle.angle += 0.02;
             }
 
-            // Steam particles fade as they rise
             if (particle.type === "steam") {
                 particle.opacity = Math.max(0, particle.opacity - 0.002);
-                // Add slight expansion
                 particle.size += 0.01;
             }
 
@@ -314,7 +303,6 @@ export default function ParticleBackground({
                 particle.opacity = Math.max(0, particle.opacity - 0.005);
             }
 
-            // Wrap around screen edges
             if (particle.x < 0) {
                 particle.x = canvas.width;
             }
@@ -328,7 +316,6 @@ export default function ParticleBackground({
                 particle.y = 0;
             }
 
-            // Reset particle if it's too old or too faded
             if (particle.life > particle.maxLife || particle.opacity <= 0) {
                 Object.assign(particle, createParticle());
             }
@@ -355,7 +342,6 @@ export default function ParticleBackground({
             particlesRef.current.pop();
         }
 
-        // Draw connections for cyberpunk theme
         if (theme === ThemeType.CYBERPUNK) {
             ctx.strokeStyle = config.colors[0];
             ctx.globalAlpha = 0.1;
