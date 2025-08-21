@@ -2,7 +2,7 @@
 
 import React, { ChangeEvent, DragEvent, ReactElement, useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
-import { FileUpload } from "waifuvault-node-api";
+import type { FileUpload } from "waifuvault-node-api";
 import { Restriction, UploadItem } from "./types/upload";
 import { formatFileSize, validateUploadOptions } from "./utils/upload";
 import UploadQueue from "./components/UploadQueue";

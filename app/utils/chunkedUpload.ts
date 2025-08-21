@@ -1,4 +1,4 @@
-import { FileUpload, WaifuFile } from "waifuvault-node-api";
+import type { FileUpload, WaifuFile } from "waifuvault-node-api";
 
 interface ChunkUploadOptions extends Partial<FileUpload> {
     filename: string;
@@ -69,8 +69,8 @@ export class ChunkedUploader {
         const activePromises = new Set<Promise<void>>();
 
         const updateProgress = () => {
-            const completedChunks = chunkProgress.reduce((sum, progress) => sum + progress, 0);
-            const progress = Math.round((completedChunks / totalChunks) * 90);
+            const totalProgress = chunkProgress.reduce((sum, progress) => sum + progress, 0);
+            const progress = Math.round((totalProgress / totalChunks) * 90);
             onProgress(progress);
         };
 
@@ -84,7 +84,15 @@ export class ChunkedUploader {
             const end = Math.min(start + this.CHUNK_SIZE, file.size);
             const chunk = file.slice(start, end);
 
-            await this.uploadChunkWithRetry(chunk, chunkIndex, totalChunks, uploadId, signal);
+            chunkProgress[chunkIndex] = 0.1;
+            updateProgress();
+
+            await this.uploadChunkWithRetry(chunk, chunkIndex, totalChunks, uploadId, signal, chunkProgressPercent => {
+                chunkProgress[chunkIndex] = Math.max(0.1, chunkProgressPercent / 100);
+                updateProgress();
+            });
+
+            // Mark chunk as complete
             chunkProgress[chunkIndex] = 1;
             updateProgress();
 
@@ -95,12 +103,14 @@ export class ChunkedUploader {
             }
         };
 
+        // Start initial chunks
         for (let i = 0; i < Math.min(this.MAX_CONCURRENT_CHUNKS, totalChunks); i++) {
             const promise = uploadNextChunk();
             activePromises.add(promise);
             promise.finally(() => activePromises.delete(promise));
         }
 
+        // Wait for all chunks to complete
         while (activePromises.size > 0) {
             await Promise.race(activePromises);
         }
@@ -108,32 +118,6 @@ export class ChunkedUploader {
         if (signal.aborted) {
             throw new Error("Upload cancelled");
         }
-    }
-
-    static cancelUpload(uploadId: string): void {
-        const controller = this.activeUploads.get(uploadId);
-        if (controller) {
-            controller.abort();
-            this.activeUploads.delete(uploadId);
-
-            fetch("/api/upload/cleanup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uploadId }),
-            }).catch(() => {});
-        } else {
-            console.log("No controller found for uploadId:", uploadId);
-        }
-    }
-
-    static getUploadId(file: File, options: ChunkUploadOptions): string {
-        const optionsString = JSON.stringify(options);
-        const baseString = `${file.name}-${file.size}-${file.lastModified}-${optionsString}`;
-        return (
-            btoa(baseString)
-                .replace(/[^a-zA-Z0-9]/g, "")
-                .substring(0, 20) + Date.now().toString().slice(-6)
-        );
     }
 
     private static async finalizeUploadWithProgress(
@@ -198,10 +182,11 @@ export class ChunkedUploader {
         totalChunks: number,
         uploadId: string,
         signal?: AbortSignal,
+        onChunkProgress?: (progress: number) => void,
         retryCount = 0,
     ): Promise<void> {
         try {
-            await this.uploadChunk(chunk, chunkIndex, totalChunks, uploadId, signal);
+            await this.uploadChunk(chunk, chunkIndex, totalChunks, uploadId, signal, onChunkProgress);
         } catch (error) {
             if ((error as Error).name === "AbortError" && signal?.aborted) {
                 throw new Error("Upload cancelled");
@@ -210,7 +195,15 @@ export class ChunkedUploader {
             if (retryCount < this.MAX_RETRIES) {
                 console.warn(`Chunk ${chunkIndex} failed, retrying (${retryCount + 1}/${this.MAX_RETRIES})`);
                 await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
-                return this.uploadChunkWithRetry(chunk, chunkIndex, totalChunks, uploadId, signal, retryCount + 1);
+                return this.uploadChunkWithRetry(
+                    chunk,
+                    chunkIndex,
+                    totalChunks,
+                    uploadId,
+                    signal,
+                    onChunkProgress,
+                    retryCount + 1,
+                );
             }
             throw new Error(`Chunk ${chunkIndex} failed after ${this.MAX_RETRIES} retries: ${error}`);
         }
@@ -222,6 +215,7 @@ export class ChunkedUploader {
         totalChunks: number,
         uploadId: string,
         signal?: AbortSignal,
+        onChunkProgress?: (progress: number) => void,
     ): Promise<void> {
         const formData = new FormData();
         formData.append("chunk", chunk);
@@ -235,6 +229,8 @@ export class ChunkedUploader {
         const combinedSignal = signal ? this.combineSignals([signal, controller.signal]) : controller.signal;
 
         try {
+            onChunkProgress?.(50);
+
             const response = await fetch("/api/upload/chunk", {
                 method: "POST",
                 body: formData,
@@ -247,6 +243,8 @@ export class ChunkedUploader {
                 const errorText = await response.text();
                 throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
+
+            onChunkProgress?.(100);
         } catch (error) {
             clearTimeout(timeoutId);
             if ((error as Error).name === "AbortError") {
@@ -257,6 +255,32 @@ export class ChunkedUploader {
             }
             throw error;
         }
+    }
+
+    static cancelUpload(uploadId: string): void {
+        const controller = this.activeUploads.get(uploadId);
+        if (controller) {
+            controller.abort();
+            this.activeUploads.delete(uploadId);
+
+            fetch("/api/upload/cleanup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uploadId }),
+            }).catch(() => {});
+        } else {
+            console.log("No controller found for uploadId:", uploadId);
+        }
+    }
+
+    static getUploadId(file: File, options: ChunkUploadOptions): string {
+        const optionsString = JSON.stringify(options);
+        const baseString = `${file.name}-${file.size}-${file.lastModified}-${optionsString}`;
+        return (
+            btoa(baseString)
+                .replace(/[^a-zA-Z0-9]/g, "")
+                .substring(0, 20) + Date.now().toString().slice(-6)
+        );
     }
 
     private static generateUploadId(): string {
