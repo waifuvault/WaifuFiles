@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start -H localhost",
     "lint": "eslint .",

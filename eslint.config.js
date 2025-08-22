@@ -2,7 +2,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { FlatCompat } from "@eslint/eslintrc";
-import { fixupConfigRules } from "@eslint/compat";
 import tseslint from "typescript-eslint";
 import eslintJs from "@eslint/js";
 
@@ -17,7 +16,10 @@ const config = [
     { ignores: [".next/**"] },
     eslintJs.configs.recommended,
     ...tseslint.configs.recommended,
-    ...fixupConfigRules(compat.extends("next/core-web-vitals", "next")),
+    ...compat.extends("next/core-web-vitals", "next/typescript"),
+    {
+        ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"],
+    },
     {
         rules: {
             curly: ["error", "all"],
