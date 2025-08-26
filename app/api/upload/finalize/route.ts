@@ -3,6 +3,7 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import Waifuvault, { FileUpload } from "waifuvault-node-api";
 import { cleanup, log } from "@/app/utils/server";
+import process from "node:process";
 
 interface ChunkUploadOptions extends Partial<FileUpload> {
     filename: string;
@@ -21,6 +22,23 @@ export async function POST(req: NextRequest) {
 
     if (!bucketToken) {
         return NextResponse.json({ error: "Bucket token not configured" }, { status: 500 });
+    }
+
+    let clientIP: string | undefined;
+
+    if (process.env.USE_CLOUDFLARE === "true" && req.headers.get("cf-connecting-ip")) {
+        clientIP = req.headers.get("cf-connecting-ip") ?? undefined;
+    } else {
+        clientIP =
+            req.headers.get("x-forwarded-for") ??
+            req.headers.get("x-real-ip") ??
+            req.headers.get("cf-connecting-ip") ??
+            req.headers.get("x-forwarded-for") ??
+            undefined;
+    }
+
+    if (clientIP) {
+        clientIP = extractIp(clientIP);
     }
 
     let uploadId: string | undefined;
@@ -80,6 +98,7 @@ export async function POST(req: NextRequest) {
             bucketToken,
             file: finalBuffer,
             filename,
+            clientIP,
         };
 
         if (restOptions.expires && restOptions.expires.trim() !== "") {
@@ -140,4 +159,19 @@ export async function POST(req: NextRequest) {
             { status: 500 },
         );
     }
+}
+
+function extractIp(ipString: string): string {
+    const ipSplit = ipString.split(":");
+    if (ipSplit.length === 1 || (ipSplit.length > 2 && !ipString.includes("]"))) {
+        return ipString;
+    }
+    if (ipSplit.length === 2) {
+        return ipSplit[0];
+    }
+    return ipSplit
+        .slice(0, ipSplit.length - 1)
+        .join(":")
+        .replace(/\[/, "")
+        .replace(/]/, "");
 }
