@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
 
     if (clientIP) {
         clientIP = extractIp(clientIP);
+        log.info(`Client IP: ${clientIP}`);
     }
 
     let uploadId: string | undefined;
