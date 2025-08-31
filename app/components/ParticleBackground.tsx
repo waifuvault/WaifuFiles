@@ -60,7 +60,7 @@ export default function ParticleBackground({
             case ThemeType.ORANGE_PHOSPHOR:
                 return {
                     colors: currentTheme === ThemeType.GREEN_PHOSPHOR ? ["#00ff00", "#008000"] : ["#ffa500", "#cc8400"],
-                    particleTypes: ["dot", "code"],
+                    particleTypes: ["code"],
                     glowEffect: true,
                     speed: 1,
                 };
@@ -123,6 +123,14 @@ export default function ParticleBackground({
                 life: 0,
                 maxLife: Math.random() * 1000 + 500,
             };
+
+            if (particle.type === "code") {
+                particle.angle = 0;
+                particle.size = 8;
+                particle.vx = 0;
+                particle.vy = config.speed;
+                particle.maxLife *= 3;
+            }
 
             if (particle.type === "gear") {
                 particle.rotationSpeed = (Math.random() - 0.5) * 0.02;
@@ -236,7 +244,53 @@ export default function ParticleBackground({
                 case "code": {
                     ctx.font = `${particle.size * 3}px monospace`;
                     ctx.textAlign = "center";
-                    const codeChars = ["<", ">", "{", "}", "/", "\\", "|", "-", "+"];
+                    const codeChars = [
+                        "<",
+                        ">",
+                        "{",
+                        "}",
+                        "/",
+                        "\\",
+                        "|",
+                        "-",
+                        "+",
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                        "G",
+                        "H",
+                        "I",
+                        "J",
+                        "K",
+                        "L",
+                        "M",
+                        "N",
+                        "O",
+                        "P",
+                        "Q",
+                        "R",
+                        "S",
+                        "T",
+                        "U",
+                        "V",
+                        "W",
+                        "X",
+                        "Y",
+                        "Z",
+                    ];
                     const char = codeChars[Math.floor(particle.life / 100) % codeChars.length];
                     ctx.fillText(char, 0, particle.size);
                     break;
