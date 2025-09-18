@@ -276,11 +276,12 @@ export class ChunkedUploader {
     static getUploadId(file: File, options: ChunkUploadOptions): string {
         const optionsString = JSON.stringify(options);
         const baseString = `${file.name}-${file.size}-${file.lastModified}-${optionsString}`;
-        return (
-            btoa(baseString)
-                .replace(/[^a-zA-Z0-9]/g, "")
-                .substring(0, 20) + Date.now().toString().slice(-6)
-        );
+
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(baseString);
+        const base64 = btoa(String.fromCharCode(...bytes));
+
+        return base64.replace(/[^a-zA-Z0-9]/g, "").substring(0, 20) + Date.now().toString().slice(-6);
     }
 
     private static generateUploadId(): string {
