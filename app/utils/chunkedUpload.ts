@@ -1,4 +1,5 @@
-import type { FileUpload, WaifuFile } from "waifuvault-node-api";
+import type { FileUpload } from "waifuvault-node-api";
+import type { PublicFileInfo } from "@/app/types/upload";
 
 interface ChunkUploadOptions extends Partial<FileUpload> {
     filename: string;
@@ -21,7 +22,7 @@ export class ChunkedUploader {
         onProgress: (progress: number) => void,
         onProcessing: () => void,
         uploadId?: string,
-    ): Promise<WaifuFile> {
+    ): Promise<PublicFileInfo> {
         const totalChunks = Math.ceil(file.size / this.CHUNK_SIZE);
         const actualUploadId = uploadId ?? this.generateUploadId();
         const mainController = new AbortController();
@@ -37,7 +38,7 @@ export class ChunkedUploader {
 
             onProcessing();
 
-            const result = await this.finalizeUploadWithProgress(actualUploadId, options, mainController.signal);
+            const result = await this.finaliseUploadWithProgress(actualUploadId, options, mainController.signal);
 
             this.activeUploads.delete(actualUploadId);
             return result;
@@ -120,15 +121,15 @@ export class ChunkedUploader {
         }
     }
 
-    private static async finalizeUploadWithProgress(
+    private static async finaliseUploadWithProgress(
         uploadId: string,
         options: ChunkUploadOptions,
         signal?: AbortSignal,
-    ): Promise<WaifuFile> {
-        const MAX_FINALIZE_ATTEMPTS = 3;
+    ): Promise<PublicFileInfo> {
+        const MAX_FINALISE_ATTEMPTS = 3;
         const INITIAL_TIMEOUT = 300000; // 5 minutes
 
-        for (let attempt = 1; attempt <= MAX_FINALIZE_ATTEMPTS; attempt++) {
+        for (let attempt = 1; attempt <= MAX_FINALISE_ATTEMPTS; attempt++) {
             const timeout = INITIAL_TIMEOUT * attempt;
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -136,9 +137,9 @@ export class ChunkedUploader {
             const combinedSignal = signal ? this.combineSignals([signal, controller.signal]) : controller.signal;
 
             try {
-                console.log(`Finalization attempt ${attempt}/${MAX_FINALIZE_ATTEMPTS} (timeout: ${timeout / 1000}s)`);
+                console.log(`Finalisation attempt ${attempt}/${MAX_FINALISE_ATTEMPTS} (timeout: ${timeout / 1000}s)`);
 
-                const response = await fetch("/api/upload/finalize", {
+                const response = await fetch("/api/upload/finalise", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ uploadId, options }),
@@ -160,12 +161,12 @@ export class ChunkedUploader {
                     if (signal?.aborted) {
                         throw new Error("Upload cancelled");
                     }
-                    if (attempt === MAX_FINALIZE_ATTEMPTS) {
+                    if (attempt === MAX_FINALISE_ATTEMPTS) {
                         throw new Error(
-                            `Upload finalization failed after ${MAX_FINALIZE_ATTEMPTS} attempts - file may be too large`,
+                            `Upload finalisation failed after ${MAX_FINALISE_ATTEMPTS} attempts - file may be too large`,
                         );
                     }
-                    console.warn(`Finalization attempt ${attempt} timed out, retrying...`);
+                    console.warn(`Finalisation attempt ${attempt} timed out, retrying...`);
                     continue;
                 }
 
@@ -173,7 +174,7 @@ export class ChunkedUploader {
             }
         }
 
-        throw new Error("Finalization failed after all retry attempts");
+        throw new Error("Finalisation failed after all retry attempts");
     }
 
     private static async uploadChunkWithRetry(

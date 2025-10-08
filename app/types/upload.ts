@@ -1,8 +1,18 @@
-import { FileUpload, WaifuFile } from "waifuvault-node-api";
+import { FileUpload } from "waifuvault-node-api";
 
 export interface Restriction {
     type: string;
     value: number | string;
+}
+
+export interface PublicFileInfo {
+    url: string;
+    options: {
+        hideFilename: boolean;
+        oneTimeDownload: boolean;
+        protected: boolean;
+    };
+    retentionPeriod: string | number | null;
 }
 
 export interface UploadItem {
@@ -11,7 +21,7 @@ export interface UploadItem {
     options: Partial<FileUpload>;
     status: "pending" | "queued" | "uploading" | "processing" | "completed" | "error";
     progress?: number;
-    result?: WaifuFile;
+    result?: PublicFileInfo;
     error?: string;
     uploadId?: string;
     showOptions?: boolean;

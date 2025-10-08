@@ -128,7 +128,11 @@ export async function POST(req: NextRequest) {
 
         await cleanup(uploadId);
 
-        return NextResponse.json(result);
+        return NextResponse.json({
+            url: result.url,
+            options: result.options,
+            retentionPeriod: result.retentionPeriod,
+        });
     } catch (error) {
         log.debugError("Finalize upload error:", error);
 
