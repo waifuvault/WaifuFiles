@@ -19,8 +19,6 @@ export default function ThemeSelector() {
 
     const handleThemeChange = (themeId: ThemeType) => {
         setTheme(themeId);
-        document.documentElement.dataset.theme = themeId;
-        localStorage.setItem("waifuvault-theme", themeId);
         setIsOpen(false);
     };
 

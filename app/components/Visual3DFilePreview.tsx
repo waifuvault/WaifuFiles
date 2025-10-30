@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./VisualFilePreview.module.css";
 import { FilePreview as FilePreviewType, generateFilePreview, getFileIcon } from "../utils/filePreview";
 import { AudioPreview } from "@/app/components/AudioPreview";
@@ -33,6 +33,12 @@ export default function Visual3DFilePreview({
     const containerRef = useRef<HTMLDivElement>(null);
     const animationRef = useRef<number>(null);
     const { getThemeClass } = useTheme();
+
+    const formatDuration = useCallback((seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -144,13 +150,7 @@ export default function Visual3DFilePreview({
                 URL.revokeObjectURL(urlToRevoke);
             }
         };
-    }, [file]);
-
-    const formatDuration = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
+    }, [file, formatDuration]);
 
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!interactive || !containerRef.current) {
