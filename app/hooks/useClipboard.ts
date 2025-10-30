@@ -26,9 +26,11 @@ export function useClipboard({ onFilesDetected, onUrlDetected, enabled = true }:
     const onFilesDetectedRef = useRef(onFilesDetected);
     const onUrlDetectedRef = useRef(onUrlDetected);
 
-    enabledRef.current = enabled;
-    onFilesDetectedRef.current = onFilesDetected;
-    onUrlDetectedRef.current = onUrlDetected;
+    useEffect(() => {
+        enabledRef.current = enabled;
+        onFilesDetectedRef.current = onFilesDetected;
+        onUrlDetectedRef.current = onUrlDetected;
+    }, [enabled, onFilesDetected, onUrlDetected]);
 
     const checkClipboardContentRef = useRef<() => Promise<void>>(null);
     const pasteFromClipboardRef = useRef<() => Promise<void>>(null);

@@ -75,20 +75,24 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-    const [currentTheme, setCurrentTheme] = useState<ThemeType>(ThemeType.DEFAULT);
-    const [particlesEnabled, setParticlesEnabledState] = useState<boolean>(true);
-
-    useEffect(() => {
-        const savedTheme = localStorage.getItem(localStoreThemeKey) as ThemeType;
-        if (savedTheme && themes.find(t => t.id === savedTheme)) {
-            setCurrentTheme(savedTheme);
+    const [currentTheme, setCurrentTheme] = useState<ThemeType>(() => {
+        if (typeof window !== "undefined") {
+            const savedTheme = localStorage.getItem(localStoreThemeKey) as ThemeType;
+            if (savedTheme && themes.find(t => t.id === savedTheme)) {
+                return savedTheme;
+            }
         }
-
-        const savedParticles = localStorage.getItem(localStoreParticlesKey);
-        if (savedParticles !== null) {
-            setParticlesEnabledState(savedParticles === "true");
+        return ThemeType.DEFAULT;
+    });
+    const [particlesEnabled, setParticlesEnabledState] = useState<boolean>(() => {
+        if (typeof window !== "undefined") {
+            const savedParticles = localStorage.getItem(localStoreParticlesKey);
+            if (savedParticles !== null) {
+                return savedParticles === "true";
+            }
         }
-    }, []);
+        return true;
+    });
 
     useEffect(() => {
         const observer = new MutationObserver(() => {
